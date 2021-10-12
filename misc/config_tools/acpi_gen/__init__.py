@@ -4,4 +4,3 @@
 """__init__ for acpi generator.
 
 """
-

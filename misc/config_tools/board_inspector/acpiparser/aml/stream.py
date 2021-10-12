@@ -6,6 +6,7 @@
 from .exception import *
 from .grammar import AML_EXT_OP_PREFIX
 
+
 class Stream:
     def print_binary(self, base):
         acc = f"[{hex(base)}/{hex(len(self.data))}]"
@@ -33,7 +34,7 @@ class Stream:
             raise ScopeMismatch
         ret = 0
         for i in range(0, count):
-            ret += (self.data[self.current + i] << (i * 8))
+            ret += self.data[self.current + i] << (i * 8)
         return ret
 
     def get_integer(self, count):
@@ -60,14 +61,14 @@ class Stream:
     def get_opcode(self):
         opcode = self.get_integer(1)
         if opcode == AML_EXT_OP_PREFIX:
-            opcode += (self.get_integer(1) << 8)
+            opcode += self.get_integer(1) << 8
             return (opcode, 2)
         return (opcode, 1)
 
     def get_fixed_length_string(self, count):
         if self.current + count > self.scopes[-1]:
             raise ScopeMismatch
-        ret = self.data[self.current : self.current + count].decode("latin-1")
+        ret = self.data[self.current: self.current + count].decode("latin-1")
         self.current += count
         return ret
 
@@ -76,14 +77,14 @@ class Stream:
         assert null >= 0
         if null + 1 > self.scopes[-1]:
             raise ScopeMismatch
-        ret = self.data[self.current:null].decode("latin-1")
+        ret = self.data[self.current: null].decode("latin-1")
         self.current = null + 1
         return ret
 
     def get_buffer(self):
         cur = self.current
         self.current = self.scopes[-1]
-        return self.data[cur:self.current]
+        return self.data[cur: self.current]
 
     def seek(self, offset, absolute=False):
         if absolute:

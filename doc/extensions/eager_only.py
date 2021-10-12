@@ -25,11 +25,10 @@ from docutils.parsers.rst import directives
 
 
 class EagerOnly(sphinx.directives.other.Only):
-
     def run(self, *args):
         # Evaluate the condition eagerly, and if false return no nodes right away
         env = self.state.document.settings.env
-        env.app.builder.tags.add('TRUE')
+        env.app.builder.tags.add("TRUE")
 
         if not env.app.builder.tags.eval_condition(self.arguments[0]):
             return []
@@ -37,12 +36,12 @@ class EagerOnly(sphinx.directives.other.Only):
         # Otherwise, do the usual processing
         nodes = super(EagerOnly, self).run()
         if len(nodes) == 1:
-            nodes[0]['expr'] = 'TRUE'
+            nodes[0]["expr"] = "TRUE"
         return nodes
 
 
 def setup(app):
-    directives.register_directive('only', EagerOnly)
+    directives.register_directive("only", EagerOnly)
 
     # The tags.add call above is setting tags.tags['TRUE'] = True.
     # The operation is idempotent and will have taken effect before
@@ -50,6 +49,6 @@ def setup(app):
     # safe both for read and writes (all other operations are local to
     # the local nodes variable).
     return {
-        'parallel_read_safe': True,
-        'parallel_write_safe': True,
-        }
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }

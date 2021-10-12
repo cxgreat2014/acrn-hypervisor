@@ -8,15 +8,22 @@ import sys
 import common
 import collections
 
-BOARD_NAME = ''
-BIOS_INFO = ['BIOS Information', 'Vendor:', 'Version:', 'Release Date:', 'BIOS Revision:']
-BASE_BOARD = ['Base Board Information', 'Manufacturer:', 'Product Name:', 'Version:']
+BOARD_NAME = ""
+BIOS_INFO = [
+    "BIOS Information",
+    "Vendor:",
+    "Version:",
+    "Release Date:",
+    "BIOS Revision:",
+]
+BASE_BOARD = ["Base Board Information",
+              "Manufacturer:", "Product Name:", "Version:"]
 
 LEGACY_TTYS = {
-    'ttyS0':'0x3F8',
-    'ttyS1':'0x2F8',
-    'ttyS2':'0x3E8',
-    'ttyS3':'0x2E8',
+    "ttyS0": "0x3F8",
+    "ttyS1": "0x2F8",
+    "ttyS2": "0x3E8",
+    "ttyS3": "0x2E8",
 }
 
 VALID_LEGACY_IRQ = []
@@ -27,20 +34,34 @@ HEADER_LICENSE = common.open_license() + "\n"
 
 # The data base contains hide pci device
 KNOWN_HIDDEN_PDEVS_BOARD_DB = {
-    'apl-mrb':['00:0d:0'],
-    'apl-up2':['00:0d:0'],
+    "apl-mrb": ["00:0d:0"],
+    "apl-up2": ["00:0d:0"],
 }
 
-TSN_DEVS = ["8086:4b30", "8086:4b31", "8086:4b32", "8086:4ba0", "8086:4ba1", "8086:4ba2",
-            "8086:4bb0", "8086:4bb1", "8086:4bb2", "8086:a0ac", "8086:43ac", "8086:43a2"]
+TSN_DEVS = [
+    "8086:4b30",
+    "8086:4b31",
+    "8086:4b32",
+    "8086:4ba0",
+    "8086:4ba1",
+    "8086:4ba2",
+    "8086:4bb0",
+    "8086:4bb1",
+    "8086:4bb2",
+    "8086:a0ac",
+    "8086:43ac",
+    "8086:43a2",
+]
 GPIO_DEVS = ["8086:4b88", "8086:4b89"]
-TPM_PASSTHRU_BOARD = ['whl-ipc-i5', 'whl-ipc-i7', 'tgl-rvp', 'ehl-crb-b', 'cfl-k700-i7']
+TPM_PASSTHRU_BOARD = ["whl-ipc-i5", "whl-ipc-i7",
+                      "tgl-rvp", "ehl-crb-b", "cfl-k700-i7"]
 
 KNOWN_CAPS_PCI_DEVS_DB = {
-    "VMSIX":TSN_DEVS + GPIO_DEVS,
+    "VMSIX": TSN_DEVS + GPIO_DEVS,
 }
 
-P2SB_PASSTHRU_BOARD = ('ehl-crb-b')
+P2SB_PASSTHRU_BOARD = "ehl-crb-b"
+
 
 def get_info(board_info, msg_s, msg_e):
     """
@@ -54,7 +75,7 @@ def get_info(board_info, msg_s, msg_e):
     info_lines = []
     num = len(msg_s.split())
 
-    with open(board_info, 'rt') as f_board:
+    with open(board_info, "rt") as f_board:
         while True:
 
             line = f_board.readline()
@@ -84,8 +105,11 @@ def handle_bios_info(config):
     Handle bios information
     :param config: it is a file pointer of bios information for writing to
     """
-    bios_lines = get_info(common.BOARD_INFO_FILE, "<BIOS_INFO>", "</BIOS_INFO>")
-    board_lines = get_info(common.BOARD_INFO_FILE, "<BASE_BOARD_INFO>", "</BASE_BOARD_INFO>")
+    bios_lines = get_info(common.BOARD_INFO_FILE,
+                          "<BIOS_INFO>", "</BIOS_INFO>")
+    board_lines = get_info(
+        common.BOARD_INFO_FILE, "<BASE_BOARD_INFO>", "</BASE_BOARD_INFO>"
+    )
     print("/*", file=config)
 
     if not bios_lines or not board_lines:
@@ -107,8 +131,11 @@ def handle_bios_info(config):
             i_cnt += 1
 
             for misc_info in bios_board_info:
-                if misc_info == " ".join(line.split()[0:1]) or misc_info == \
-                        " ".join(line.split()[0:2]) or misc_info == " ".join(line.split()[0:3]):
+                if (
+                    misc_info == " ".join(line.split()[0:1])
+                    or misc_info == " ".join(line.split()[0:2])
+                    or misc_info == " ".join(line.split()[0:3])
+                ):
                     print(" * {0}".format(line.strip()), file=config)
 
     print(" */", file=config)
@@ -132,23 +159,27 @@ def get_max_clos_mask(board_file):
     :param board_file: it is a file what contains board information for script to read from
     :return: type of rdt resource supported and their corresponding clos max.
     """
-    rdt_res=[]
-    rdt_res_clos_max=[]
-    rdt_res_mask_max=[]
+    rdt_res = []
+    rdt_res_clos_max = []
+    rdt_res_mask_max = []
 
     clos_lines = get_info(board_file, "<CLOS_INFO>", "</CLOS_INFO>")
     for line in clos_lines:
-        if line.split(':')[0].strip() == "rdt resources supported":
-            rdt_res = line.split(':')[1].strip()
-        elif line.split(':')[0].strip() == "rdt resource clos max":
-            rdt_res_clos_max = line.split(':')[1].strip()
-        elif line.split(':')[0].strip() == "rdt resource mask max":
-            rdt_res_mask_max = line.split(':')[1].strip()
+        if line.split(":")[0].strip() == "rdt resources supported":
+            rdt_res = line.split(":")[1].strip()
+        elif line.split(":")[0].strip() == "rdt resource clos max":
+            rdt_res_clos_max = line.split(":")[1].strip()
+        elif line.split(":")[0].strip() == "rdt resource mask max":
+            rdt_res_mask_max = line.split(":")[1].strip()
 
     if (len(rdt_res) == 0) or (len(rdt_res_clos_max) == 0):
         return rdt_res, rdt_res_clos_max, rdt_res_mask_max
     else:
-        return list(re.split(', |\s |,', rdt_res)), list(map(int, rdt_res_clos_max.split(','))), list(re.split(', |\s |,', rdt_res_mask_max))
+        return (
+            list(re.split(", |\s |,", rdt_res)),
+            list(map(int, rdt_res_clos_max.split(","))),
+            list(re.split(", |\s |,", rdt_res_mask_max)),
+        )
 
 
 def get_rootfs(config_file):
@@ -158,7 +189,8 @@ def get_rootfs(config_file):
     :return: rootfs partition list
     """
     root_dev_list = []
-    rootfs_lines = get_info(config_file, "<BLOCK_DEVICE_INFO>", "</BLOCK_DEVICE_INFO>")
+    rootfs_lines = get_info(
+        config_file, "<BLOCK_DEVICE_INFO>", "</BLOCK_DEVICE_INFO>")
 
     # none 'BLOCK_DEVICE_INFO' tag
     if rootfs_lines == None:
@@ -171,37 +203,39 @@ def get_rootfs(config_file):
         if not handle_root_dev(rootfs_line):
             continue
 
-        root_dev = rootfs_line.strip().split(':')[0]
+        root_dev = rootfs_line.strip().split(":")[0]
         root_dev_list.append(root_dev)
 
     return (root_dev_list, len(root_dev_list))
 
 
 def clos_info_parser(board_info):
-    """ Parse CLOS information """
+    """Parse CLOS information"""
     return get_max_clos_mask(board_info)
 
 
 def get_valid_irq(board_info):
     """
-     This is get available irq from board info file
-     :param board_info:  it is a file what contains board information for script to read from
-     :return: None
-     """
+    This is get available irq from board info file
+    :param board_info:  it is a file what contains board information for script to read from
+    :return: None
+    """
     global VALID_LEGACY_IRQ
     val_irq = []
-    irq_info_lines = get_info(board_info, "<AVAILABLE_IRQ_INFO>", "</AVAILABLE_IRQ_INFO>")
+    irq_info_lines = get_info(
+        board_info, "<AVAILABLE_IRQ_INFO>", "</AVAILABLE_IRQ_INFO>"
+    )
     for irq_string in irq_info_lines:
-        val_irq = [x.strip() for x in irq_string.split(',')]
+        val_irq = [x.strip() for x in irq_string.split(",")]
 
     VALID_LEGACY_IRQ = val_irq
 
 
 def alloc_irq():
     """
-      This is allocated an available irq
-      :return: free irq
-      """
+    This is allocated an available irq
+    :return: free irq
+    """
     irq_val = VALID_LEGACY_IRQ.pop(0)
 
     return irq_val
@@ -214,15 +248,17 @@ def parser_hv_console():
     2. /dev/ttyS2
     3. ttyS2
     """
-    ttys_n = ''
+    ttys_n = ""
     err_dic = {}
-    ttys = common.get_hv_item_tag(common.SCENARIO_INFO_FILE, "DEBUG_OPTIONS", "SERIAL_CONSOLE")
+    ttys = common.get_hv_item_tag(
+        common.SCENARIO_INFO_FILE, "DEBUG_OPTIONS", "SERIAL_CONSOLE"
+    )
 
     if not ttys or ttys == None:
         return (err_dic, ttys_n)
 
-    if ttys and 'BDF' in ttys or '/dev' in ttys:
-        ttys_n = ttys.split('/')[2]
+    if ttys and "BDF" in ttys or "/dev" in ttys:
+        ttys_n = ttys.split("/")[2]
     else:
         ttys_n = ttys
 
@@ -237,7 +273,9 @@ def get_processor_info():
     """
     processor_list = []
     tmp_list = []
-    processor_info = get_info(common.BOARD_INFO_FILE, "<CPU_PROCESSOR_INFO>", "</CPU_PROCESSOR_INFO>")
+    processor_info = get_info(
+        common.BOARD_INFO_FILE, "<CPU_PROCESSOR_INFO>", "</CPU_PROCESSOR_INFO>"
+    )
 
     if not processor_info:
         key = "CPU PROCESSOR_INFO error:"
@@ -248,7 +286,7 @@ def get_processor_info():
         if not processor_line:
             break
 
-        processor_list = processor_line.strip().split(',')
+        processor_list = processor_line.strip().split(",")
         for processor in processor_list:
             tmp_list.append(processor.strip())
         break
@@ -269,14 +307,15 @@ def get_native_ttys_info(board_info):
         if not ttys_line:
             break
 
-        ttys_dev = ttys_line.split()[0].split(':')[1]
-        ttysn = ttys_dev.split('/')[-1]
+        ttys_dev = ttys_line.split()[0].split(":")[1]
+        ttysn = ttys_dev.split("/")[-1]
         # currently SOS console can only support legacy serial port
         if ttysn not in list(LEGACY_TTYS.keys()):
             continue
         ttys_list.append(ttys_dev)
 
     return ttys_list
+
 
 def get_total_mem():
     """
@@ -285,7 +324,9 @@ def get_total_mem():
     """
     scale_to_mb = 1
     total_mem_mb = scale_to_mb
-    mem_lines = get_info(common.BOARD_INFO_FILE, "<TOTAL_MEM_INFO>", "</TOTAL_MEM_INFO>")
+    mem_lines = get_info(
+        common.BOARD_INFO_FILE, "<TOTAL_MEM_INFO>", "</TOTAL_MEM_INFO>"
+    )
     for mem_line in mem_lines:
         mem_info_list = mem_line.split()
 
@@ -307,7 +348,7 @@ def get_pci_info(board_info):
     pci_start = False
     pci_end = False
 
-    with open(board_info, 'r') as f:
+    with open(board_info, "r") as f:
         while True:
             line = f.readline()
             if not line:
@@ -349,7 +390,9 @@ def get_pci_info(board_info):
 
     return (pci_desc, pci_bdf_vpid)
 
+
 HI_MMIO_OFFSET = 0
+
 
 class Bar_Mem:
     def __init__(self):
@@ -363,18 +406,20 @@ class Bar_Attr:
         self.remappable = True
         self.name_w_i_cnt = 0
 
+
 class Pci_Dev_Bar_Desc:
     def __init__(self):
         self.pci_dev_dic = collections.OrderedDict()
         self.pci_bar_dic = collections.OrderedDict()
         self.shm_bar_dic = collections.OrderedDict()
 
+
 PCI_DEV_BAR_DESC = Pci_Dev_Bar_Desc()
 SUB_NAME_COUNT = collections.OrderedDict()
 
 
 def get_value_after_str(line, key):
-    """ Get the value after cstate string """
+    """Get the value after cstate string"""
     idx = 0
     line_in_list = line.split()
     for idx_key, val in enumerate(line_in_list):
@@ -386,7 +431,7 @@ def get_value_after_str(line, key):
 
 
 def check_bar_remappable(line):
-    #TODO: check device BAR remappable per ACPI table
+    # TODO: check device BAR remappable per ACPI table
 
     return True
 
@@ -394,17 +439,18 @@ def check_bar_remappable(line):
 def get_size(line):
 
     # get size string from format, Region n: Memory at x ... [size=NK]
-    size_str = line.split()[-1].strip(']').split('=')[1]
-    if 'G' in size_str:
-        size = int(size_str.strip('G')) * common.SIZE_G
-    elif 'M' in size_str:
-        size = int(size_str.strip('M')) * common.SIZE_M
-    elif 'K' in size_str:
-        size = int(size_str.strip('K')) * common.SIZE_K
+    size_str = line.split()[-1].strip("]").split("=")[1]
+    if "G" in size_str:
+        size = int(size_str.strip("G")) * common.SIZE_G
+    elif "M" in size_str:
+        size = int(size_str.strip("M")) * common.SIZE_M
+    elif "K" in size_str:
+        size = int(size_str.strip("K")) * common.SIZE_K
     else:
         size = int(size_str)
 
     return size
+
 
 # round up the running bar_addr to the size of the incoming bar "line"
 def remap_bar_addr_to_high(bar_addr, line):
@@ -417,26 +463,27 @@ def remap_bar_addr_to_high(bar_addr, line):
 
 
 def parser_pci():
-    """ Parse PCI lines """
+    """Parse PCI lines"""
     global SUB_NAME_COUNT, HI_MMIO_OFFSET
     cur_bdf = 0
     prev_bdf = 0
     tmp_bar_dic = {}
-    bar_addr = bar_num = '0'
+    bar_addr = bar_num = "0"
     cal_sub_pci_name = []
 
-    pci_lines = get_info(common.BOARD_INFO_FILE, "<PCI_DEVICE>", "</PCI_DEVICE>")
+    pci_lines = get_info(common.BOARD_INFO_FILE,
+                         "<PCI_DEVICE>", "</PCI_DEVICE>")
 
     for line in pci_lines:
         tmp_bar_mem = Bar_Mem()
         # get pci bar information into board_cfg_lib.PCI_DEV_BAR_DESC
         if "Region" in line and "Memory at" in line:
-            #ignore memory region from SR-IOV capabilities
+            # ignore memory region from SR-IOV capabilities
             if "size=" not in line:
-                 continue
+                continue
 
             bar_addr = int(get_value_after_str(line, "at"), 16)
-            bar_num = line.split()[1].strip(':')
+            bar_num = line.split()[1].strip(":")
             if bar_addr >= common.SIZE_4G or bar_addr < common.SIZE_2G:
                 if not tmp_bar_attr.remappable:
                     continue
@@ -450,11 +497,11 @@ def parser_pci():
             tmp_bar_attr = Bar_Attr()
             prev_bdf = cur_bdf
             pci_bdf = line.split()[0]
-            tmp_bar_attr.name = " ".join(line.split(':')[1].split()[1:])
+            tmp_bar_attr.name = " ".join(line.split(":")[1].split()[1:])
 
             # remove '[*]' in pci subname
-            if '[' in tmp_bar_attr.name:
-                tmp_bar_attr.name = tmp_bar_attr.name.rsplit('[', 1)[0]
+            if "[" in tmp_bar_attr.name:
+                tmp_bar_attr.name = tmp_bar_attr.name.rsplit("[", 1)[0]
 
             cal_sub_pci_name.append(tmp_bar_attr.name)
             tmp_bar_attr.remappable = check_bar_remappable(line)
@@ -479,20 +526,28 @@ def parser_pci():
 
 
 def parse_mem():
-    raw_shmem_regions = common.get_hv_item_tag(common.SCENARIO_INFO_FILE, "FEATURES", "IVSHMEM", "IVSHMEM_REGION")
+    raw_shmem_regions = common.get_hv_item_tag(
+        common.SCENARIO_INFO_FILE, "FEATURES", "IVSHMEM", "IVSHMEM_REGION"
+    )
 
     global USED_RAM_RANGE
     for shm_name, shm_bar_dic in PCI_DEV_BAR_DESC.shm_bar_dic.items():
-        if 0 in shm_bar_dic.keys() and int(shm_bar_dic[0].addr, 16) in USED_RAM_RANGE.keys():
+        if (
+            0 in shm_bar_dic.keys()
+            and int(shm_bar_dic[0].addr, 16) in USED_RAM_RANGE.keys()
+        ):
             del USED_RAM_RANGE[int(shm_bar_dic[0].addr, 16)]
-        if 2 in shm_bar_dic.keys() and int(shm_bar_dic[2].addr, 16)-0xC in USED_RAM_RANGE.keys():
-            del USED_RAM_RANGE[int(shm_bar_dic[2].addr, 16)-0xC]
+        if (
+            2 in shm_bar_dic.keys()
+            and int(shm_bar_dic[2].addr, 16) - 0xC in USED_RAM_RANGE.keys()
+        ):
+            del USED_RAM_RANGE[int(shm_bar_dic[2].addr, 16) - 0xC]
 
     idx = 0
     for shm in raw_shmem_regions:
-        if shm is None or shm.strip() == '':
+        if shm is None or shm.strip() == "":
             continue
-        shm_splited = shm.split(',')
+        shm_splited = shm.split(",")
         name = shm_splited[0].strip()
         size = shm_splited[1].strip()
 
@@ -501,21 +556,27 @@ def parse_mem():
         except:
             int_size = 0
         ram_range = get_ram_range()
-        tmp_bar_dict  = {}
+        tmp_bar_dict = {}
         hv_start_offset = 0x80000000
-        ret_start_addr = find_avl_memory(ram_range, str(0x200100), hv_start_offset)
+        ret_start_addr = find_avl_memory(
+            ram_range, str(0x200100), hv_start_offset)
         bar_mem_0 = Bar_Mem()
-        bar_mem_0.addr = hex(common.round_up(int(ret_start_addr, 16), 0x200000))
+        bar_mem_0.addr = hex(common.round_up(
+            int(ret_start_addr, 16), 0x200000))
         USED_RAM_RANGE[int(bar_mem_0.addr, 16)] = 0x100
         tmp_bar_dict[0] = bar_mem_0
         ram_range = get_ram_range()
         hv_start_offset2 = 0x100000000
-        ret_start_addr2 = find_avl_memory(ram_range, str(int_size + 0x200000), hv_start_offset2)
+        ret_start_addr2 = find_avl_memory(
+            ram_range, str(int_size + 0x200000), hv_start_offset2
+        )
         bar_mem_2 = Bar_Mem()
-        bar_mem_2.addr = hex(common.round_up(int(ret_start_addr2, 16), 0x200000) + 0xC)
-        USED_RAM_RANGE[common.round_up(int(ret_start_addr2, 16), 0x20000)] = int_size
+        bar_mem_2.addr = hex(common.round_up(
+            int(ret_start_addr2, 16), 0x200000) + 0xC)
+        USED_RAM_RANGE[common.round_up(
+            int(ret_start_addr2, 16), 0x20000)] = int_size
         tmp_bar_dict[2] = bar_mem_2
-        PCI_DEV_BAR_DESC.shm_bar_dic[str(idx)+'_'+name] = tmp_bar_dict
+        PCI_DEV_BAR_DESC.shm_bar_dic[str(idx) + "_" + name] = tmp_bar_dict
         idx += 1
 
 
@@ -534,8 +595,10 @@ def is_rdt_enabled():
     """
     Returns True if RDT enabled else False
     """
-    rdt_enabled = common.get_hv_item_tag(common.SCENARIO_INFO_FILE, "FEATURES", "RDT", "RDT_ENABLED")
-    if is_rdt_supported() and rdt_enabled == 'y':
+    rdt_enabled = common.get_hv_item_tag(
+        common.SCENARIO_INFO_FILE, "FEATURES", "RDT", "RDT_ENABLED"
+    )
+    if is_rdt_supported() and rdt_enabled == "y":
         return True
     return False
 
@@ -545,8 +608,10 @@ def is_cdp_enabled():
     Returns True if platform supports RDT/CDP else False
     """
     rdt_enabled = is_rdt_enabled()
-    cdp_enabled = common.get_hv_item_tag(common.SCENARIO_INFO_FILE, "FEATURES", "RDT", "CDP_ENABLED")
-    if rdt_enabled and cdp_enabled == 'y':
+    cdp_enabled = common.get_hv_item_tag(
+        common.SCENARIO_INFO_FILE, "FEATURES", "RDT", "CDP_ENABLED"
+    )
+    if rdt_enabled and cdp_enabled == "y":
         return True
 
     return False
@@ -554,48 +619,54 @@ def is_cdp_enabled():
 
 def get_rdt_select_opt():
 
-    support_sel = ['n']
+    support_sel = ["n"]
     if is_rdt_supported():
-        support_sel.append('y')
+        support_sel.append("y")
     return support_sel
 
 
 def get_common_clos_max():
 
     common_clos_max = 0
-    (res_info, rdt_res_clos_max, clos_max_mask_list) = clos_info_parser(common.BOARD_INFO_FILE)
+    (res_info, rdt_res_clos_max, clos_max_mask_list) = clos_info_parser(
+        common.BOARD_INFO_FILE
+    )
     if is_rdt_enabled() and not is_cdp_enabled():
         common_clos_max = min(rdt_res_clos_max)
 
     if is_cdp_enabled():
         tmp_clos_max_list = []
         for res, clos_max in zip(res_info, rdt_res_clos_max):
-            if res == 'MBA':
+            if res == "MBA":
                 tmp_clos_max_list.append(clos_max)
             else:
-                tmp_clos_max_list.append(clos_max//2)
+                tmp_clos_max_list.append(clos_max // 2)
         common_clos_max = min(tmp_clos_max_list)
 
     return common_clos_max
 
 
 def get_sub_pci_name(i_cnt, bar_attr):
-    tmp_sub_name = ''
+    tmp_sub_name = ""
     # if there is only one host bridge, then will discard the index of suffix
     if i_cnt == 0 and bar_attr.name.upper() == "HOST BRIDGE":
         tmp_sub_name = "_".join(bar_attr.name.split()).upper()
     else:
-        if '-' in bar_attr.name:
-            tmp_sub_name = common.undline_name(bar_attr.name) + "_" + str(i_cnt)
+        if "-" in bar_attr.name:
+            tmp_sub_name = common.undline_name(
+                bar_attr.name) + "_" + str(i_cnt)
         else:
-            tmp_sub_name = "_".join(bar_attr.name.split()).upper() + "_" + str(i_cnt)
+            tmp_sub_name = "_".join(
+                bar_attr.name.split()).upper() + "_" + str(i_cnt)
 
     return tmp_sub_name
 
+
 def get_known_caps_pci_devs():
     known_caps_pci_devs = {}
-    vpid_lines = get_info(common.BOARD_INFO_FILE, "<PCI_VID_PID>", "</PCI_VID_PID>")
-    for dev,known_dev in KNOWN_CAPS_PCI_DEVS_DB.items():
+    vpid_lines = get_info(common.BOARD_INFO_FILE,
+                          "<PCI_VID_PID>", "</PCI_VID_PID>")
+    for dev, known_dev in KNOWN_CAPS_PCI_DEVS_DB.items():
         if dev not in known_caps_pci_devs:
             known_caps_pci_devs[dev] = []
         for k_dev in known_dev:
@@ -612,8 +683,14 @@ def is_tpm_passthru():
 
     tpm_passthru = False
     (_, board) = common.get_board_name()
-    tpm2_passthru_enabled = common.get_leaf_tag_map(common.SCENARIO_INFO_FILE, "mmio_resources", "TPM2")
-    if board in TPM_PASSTHRU_BOARD and tpm2_passthru_enabled and 'y' in tpm2_passthru_enabled.values():
+    tpm2_passthru_enabled = common.get_leaf_tag_map(
+        common.SCENARIO_INFO_FILE, "mmio_resources", "TPM2"
+    )
+    if (
+        board in TPM_PASSTHRU_BOARD
+        and tpm2_passthru_enabled
+        and "y" in tpm2_passthru_enabled.values()
+    ):
         tpm_passthru = True
 
     return tpm_passthru
@@ -634,7 +711,10 @@ def find_avl_memory(ram_range, hpa_size, hv_start_offset):
     tmp_order_key = sorted(ram_range)
     for start_addr in tmp_order_key:
         mem_range = ram_range[start_addr]
-        if start_addr <= hv_start_offset and hv_start_offset + int_hpa_size <= start_addr + mem_range:
+        if (
+            start_addr <= hv_start_offset
+            and hv_start_offset + int_hpa_size <= start_addr + mem_range
+        ):
             ret_start_addr = hv_start_offset
             break
         elif start_addr >= hv_start_offset and mem_range >= int_hpa_size:
@@ -645,18 +725,18 @@ def find_avl_memory(ram_range, hpa_size, hv_start_offset):
 
 
 def get_ram_range():
-    """ Get System RAM range mapping """
+    """Get System RAM range mapping"""
     # read system ram from board_info.xml
     ram_range = {}
 
-    io_mem_lines = get_info(
-        common.BOARD_INFO_FILE, "<IOMEM_INFO>", "</IOMEM_INFO>")
+    io_mem_lines = get_info(common.BOARD_INFO_FILE,
+                            "<IOMEM_INFO>", "</IOMEM_INFO>")
 
     for line in io_mem_lines:
-        if 'System RAM' not in line:
+        if "System RAM" not in line:
             continue
-        start_addr = int(line.split('-')[0], 16)
-        end_addr = int(line.split('-')[1].split(':')[0], 16)
+        start_addr = int(line.split("-")[0], 16)
+        end_addr = int(line.split("-")[1].split(":")[0], 16)
         mem_range = end_addr - start_addr
         ram_range[start_addr] = mem_range
 
@@ -667,18 +747,34 @@ def get_ram_range():
         tmp_order_key = sorted(ram_range)
         for start_addr in tmp_order_key:
             mem_range = ram_range[start_addr]
-            if start_addr < start_addr_used and start_addr_used + mem_range_used < start_addr + mem_range:
+            if (
+                start_addr < start_addr_used
+                and start_addr_used + mem_range_used < start_addr + mem_range
+            ):
                 ram_range[start_addr] = start_addr_used - start_addr
-                ram_range[start_addr_used+mem_range_used] = start_addr + mem_range - start_addr_used - mem_range_used
+                ram_range[start_addr_used + mem_range_used] = (
+                    start_addr + mem_range - start_addr_used - mem_range_used
+                )
                 break
-            elif start_addr == start_addr_used and start_addr_used + mem_range_used < start_addr + mem_range:
+            elif (
+                start_addr == start_addr_used
+                and start_addr_used + mem_range_used < start_addr + mem_range
+            ):
                 del ram_range[start_addr]
-                ram_range[start_addr_used + mem_range_used] = start_addr + mem_range - start_addr_used - mem_range_used
+                ram_range[start_addr_used + mem_range_used] = (
+                    start_addr + mem_range - start_addr_used - mem_range_used
+                )
                 break
-            elif start_addr < start_addr_used and start_addr_used + mem_range_used == start_addr + mem_range:
+            elif (
+                start_addr < start_addr_used
+                and start_addr_used + mem_range_used == start_addr + mem_range
+            ):
                 ram_range[start_addr] = start_addr_used - start_addr
                 break
-            elif start_addr == start_addr_used and start_addr_used + mem_range_used == start_addr + mem_range:
+            elif (
+                start_addr == start_addr_used
+                and start_addr_used + mem_range_used == start_addr + mem_range
+            ):
                 del ram_range[start_addr]
                 break
             else:
@@ -705,16 +801,22 @@ def is_matched_board(boardlist):
 
 
 def find_p2sb_bar_addr():
-    if not is_matched_board(('ehl-crb-b')):
-        common.print_red('find_p2sb_bar_addr() can only be called for board ehl-crb-b', err=True)
+    if not is_matched_board(("ehl-crb-b")):
+        common.print_red(
+            "find_p2sb_bar_addr() can only be called for board ehl-crb-b", err=True
+        )
         sys.exit(1)
 
-    iomem_lines = get_info(common.BOARD_INFO_FILE, "<IOMEM_INFO>", "</IOMEM_INFO>")
+    iomem_lines = get_info(common.BOARD_INFO_FILE,
+                           "<IOMEM_INFO>", "</IOMEM_INFO>")
 
     for line in iomem_lines:
-        if 'INTC1020:' in line:
-            start_addr = int(line.split('-')[0], 16) & 0xFF000000
+        if "INTC1020:" in line:
+            start_addr = int(line.split("-")[0], 16) & 0xFF000000
             return start_addr
 
-    common.print_red('p2sb device is not found in board file %s!\n' % common.BOARD_INFO_FILE, err=True)
+    common.print_red(
+        "p2sb device is not found in board file %s!\n" % common.BOARD_INFO_FILE,
+        err=True,
+    )
     sys.exit(1)

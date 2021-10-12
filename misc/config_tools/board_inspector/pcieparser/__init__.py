@@ -11,6 +11,7 @@ from pcieparser.header import header
 from pcieparser.caps import capabilities
 from pcieparser.extcaps import extended_capabilities
 
+
 class PCIConfigSpace(namedtuple("PCIConfigSpace", ["header", "caps", "extcaps"])):
     def __repr__(self):
         acc = str(self.header)
@@ -31,8 +32,9 @@ class PCIConfigSpace(namedtuple("PCIConfigSpace", ["header", "caps", "extcaps"])
                 return True
         return False
 
+
 def parse_config_space(path):
-    data = open(os.path.join(path, "config"), mode='rb').read()
+    data = open(os.path.join(path, "config"), mode="rb").read()
     hdr = header(data)
     caps = capabilities(data, hdr.capability_pointer)
     config_space = PCIConfigSpace(hdr, caps, [])

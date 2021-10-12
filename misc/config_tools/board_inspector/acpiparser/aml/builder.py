@@ -7,7 +7,8 @@ from . import grammar
 from . import datatypes
 from .tree import Tree
 
-### Basic data types
+# Basic data types
+
 
 def __build_value(label, value):
     tree = Tree(label, [value])
@@ -15,34 +16,64 @@ def __build_value(label, value):
     tree.complete_parsing()
     return tree
 
+
 def __build_string(label, s):
     assert isinstance(s, str)
     return __build_value(label, s)
+
 
 def __build_const_data(label, data):
     assert isinstance(data, int)
     return __build_value(label, data)
 
-NameSeg = lambda x: __build_string("NameSeg", x)
-NameString = lambda x: __build_string("NameString", x)
-String = lambda x: __build_string("String", x)
+
+def NameSeg(x):
+    return __build_string("NameSeg", x)
+
+
+def NameString(x):
+    return __build_string("NameString", x)
+
+
+def String(x):
+    return __build_string("String", x)
+
 
 def ByteList(data):
     assert isinstance(data, (bytes, bytearray))
     return __build_value("ByteList", data)
 
-ByteData = lambda x: __build_const_data("ByteData", x)
-WordData = lambda x: __build_const_data("WordData", x)
-DWordData = lambda x: __build_const_data("DWordData", x)
-TWordData = lambda x: __build_const_data("TWordData", x)
-QWordData = lambda x: __build_const_data("QWordData", x)
+
+def ByteData(x):
+    return __build_const_data("ByteData", x)
+
+
+def WordData(x):
+    return __build_const_data("WordData", x)
+
+
+def DWordData(x):
+    return __build_const_data("DWordData", x)
+
+
+def TWordData(x):
+    return __build_const_data("TWordData", x)
+
+
+def QWordData(x):
+    return __build_const_data("QWordData", x)
+
 
 def PkgLength(length=0):
     return __build_const_data("PkgLength", length)
 
-FieldLength = lambda x: __build_const_data("FieldLength", x)
 
-### Sequences
+def FieldLength(x):
+    return __build_const_data("FieldLength", x)
+
+
+# Sequences
+
 
 def MethodInvocation(name, *args):
     if isinstance(name, str):
@@ -56,6 +87,7 @@ def MethodInvocation(name, *args):
     tree.register_structure(("NameString", "TermArg*"))
     tree.complete_parsing()
     return tree
+
 
 def __create_sequence_builder(label):
     def aux(tree, elem, arg):
@@ -72,7 +104,7 @@ def __create_sequence_builder(label):
         tree = Tree(label)
         it = iter(args)
         for elem in seq:
-            if isinstance(elem, int):    # The leading opcode
+            if isinstance(elem, int):  # The leading opcode
                 continue
             elif elem.endswith("*"):
                 for arg in it:
@@ -87,36 +119,45 @@ def __create_sequence_builder(label):
         tree.register_structure(structure)
         tree.complete_parsing()
         return tree
+
     return fn
+
 
 def build_value(value):
     if isinstance(value, (int, datatypes.Integer)):
         if isinstance(value, int):
             value = datatypes.Integer(value)
         v = value.get()
-        return \
-            ZeroOp() if v == 0 else \
-            OneOp() if v == 1 else \
-            ByteConst(v) if v <= 0xff else \
-            WordConst(v) if v <= 0xffff else \
-            DWordConst(v) if v <= 0xffffffff else \
-            QWordConst(v)
+        return (
+            ZeroOp()
+            if v == 0
+            else OneOp()
+            if v == 1
+            else ByteConst(v)
+            if v <= 0xFF
+            else WordConst(v)
+            if v <= 0xFFFF
+            else DWordConst(v)
+            if v <= 0xFFFFFFFF
+            else QWordConst(v)
+        )
     elif isinstance(value, datatypes.Buffer):
         buffer_size = len(value.get())
-        builder = ByteConst if buffer_size <= 0xff else \
-                  WordConst if buffer_size <= 0xffff else \
-                  DWordConst if buffer_size <= 0xffffffff else \
-                  QWordConst
-        return DefBuffer(
-            PkgLength(),
-            builder(buffer_size),
-            ByteList(value.get()))
+        builder = (
+            ByteConst
+            if buffer_size <= 0xFF
+            else WordConst
+            if buffer_size <= 0xFFFF
+            else DWordConst
+            if buffer_size <= 0xFFFFFFFF
+            else QWordConst
+        )
+        return DefBuffer(PkgLength(), builder(buffer_size), ByteList(value.get()))
     elif isinstance(value, datatypes.Package):
         elements = list(map(build_value, value.elements))
         return DefPackage(
-            PkgLength(),
-            len(value.elements),
-            PackageElementList(*elements))
+            PkgLength(), len(value.elements), PackageElementList(*elements)
+        )
     elif isinstance(value, (str, datatypes.String)):
         if isinstance(value, str):
             return String(value)
@@ -126,6 +167,7 @@ def build_value(value):
         return build_value(value.to_integer())
     else:
         return None
+
 
 for sym in dir(grammar):
     # Ignore builtin members and opcode constants

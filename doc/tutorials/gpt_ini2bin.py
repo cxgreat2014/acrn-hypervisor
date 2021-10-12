@@ -9,18 +9,19 @@ import struct
 import sys
 
 type_2_guid = {
-# official guid for gpt partition type
-    'fat' : 'ebd0a0a2-b9e5-4433-87c0-68b6b72699c7',
-    'esp' : 'c12a7328-f81f-11d2-ba4b-00a0c93ec93b',
-    'linux' : '0fc63daf-8483-4772-8e79-3d69d8477de4',
-    'linux-swap' : '0657fd6d-a4ab-43c4-84e5-0933c84b4f4f',
-# generated guid for android
-    'boot' : '49a4d17f-93a3-45c1-a0de-f50b2ebe2599',
-    'recovery' : '4177c722-9e92-4aab-8644-43502bfd5506',
-    'misc' : 'ef32a33b-a409-486c-9141-9ffb711f6266',
-    'metadata' : '20ac26be-20b7-11e3-84c5-6cfdb94711e9',
-    'tertiary' : '767941d0-2085-11e3-ad3b-6cfdb94711e9',
-    'factory' : '9fdaa6ef-4b3f-40d2-ba8d-bff16bfb887b' }
+    # official guid for gpt partition type
+    'fat': 'ebd0a0a2-b9e5-4433-87c0-68b6b72699c7',
+    'esp': 'c12a7328-f81f-11d2-ba4b-00a0c93ec93b',
+    'linux': '0fc63daf-8483-4772-8e79-3d69d8477de4',
+    'linux-swap': '0657fd6d-a4ab-43c4-84e5-0933c84b4f4f',
+    # generated guid for android
+    'boot': '49a4d17f-93a3-45c1-a0de-f50b2ebe2599',
+    'recovery': '4177c722-9e92-4aab-8644-43502bfd5506',
+    'misc': 'ef32a33b-a409-486c-9141-9ffb711f6266',
+    'metadata': '20ac26be-20b7-11e3-84c5-6cfdb94711e9',
+    'tertiary': '767941d0-2085-11e3-ad3b-6cfdb94711e9',
+    'factory': '9fdaa6ef-4b3f-40d2-ba8d-bff16bfb887b'}
+
 
 def zero_pad(s, size):
     if (len(s) > size):
@@ -28,10 +29,12 @@ def zero_pad(s, size):
     s += '\0' * (size - len(s))
     return s
 
+
 def copy_section(cfg, a, b):
     cfg.add_section(b)
     for option in cfg.options(a):
         cfg.set(b, option, cfg.get(a, option))
+
 
 def preparse_slots(cfg, partitions):
     if not cfg.has_option('base', 'nb_slot'):
@@ -49,12 +52,14 @@ def preparse_slots(cfg, partitions):
                 new_section = "partition." + new_part
 
                 copy_section(cfg, section, new_section)
-                cfg.set(new_section, 'label', cfg.get(section, 'label') + suffix)
-                parts_with_slot.append(new_part);
+                cfg.set(new_section, 'label', cfg.get(
+                    section, 'label') + suffix)
+                parts_with_slot.append(new_part)
         else:
-            parts_with_slot.append(p);
+            parts_with_slot.append(p)
 
     return parts_with_slot
+
 
 def preparse_partitions(gpt_in, cfg):
     with open(gpt_in, 'r') as f:
@@ -69,6 +74,7 @@ def preparse_partitions(gpt_in, cfg):
                 partitions += words[2:]
 
     return partitions
+
 
 def main():
     if len(sys.argv) != 2:
@@ -108,6 +114,7 @@ def main():
 
         guid = uuid.uuid4()
         out.write(guid.bytes_le)
+
 
 if __name__ == "__main__":
     main()

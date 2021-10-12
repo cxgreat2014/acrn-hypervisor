@@ -5,6 +5,7 @@
 
 import lxml.etree
 
+
 def getkey(child):
     def resource_subkey(node):
         typ = node.get("type")
@@ -26,9 +27,24 @@ def getkey(child):
         else:
             return 0xFFFFFFFF
 
-    tags = ["vendor", "identifier", "subsystem_vendor", "subsystem_identifier", "class",
-            "acpi_object", "compatible_id", "acpi_uid", "aml_template", "status",
-            "resource", "capability", "interrupt_pin_routing", "dependency", "bus", "device"]
+    tags = [
+        "vendor",
+        "identifier",
+        "subsystem_vendor",
+        "subsystem_identifier",
+        "class",
+        "acpi_object",
+        "compatible_id",
+        "acpi_uid",
+        "aml_template",
+        "status",
+        "resource",
+        "capability",
+        "interrupt_pin_routing",
+        "dependency",
+        "bus",
+        "device",
+    ]
 
     if child.tag == "resource":
         return (tags.index(child.tag), child.get("type"), resource_subkey(child))
@@ -36,6 +52,7 @@ def getkey(child):
         return (tags.index(child.tag), device_subkey(child))
     else:
         return (tags.index(child.tag),)
+
 
 def extract(args, board_etree):
     # Sort children of bus and device nodes

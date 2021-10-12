@@ -4,11 +4,22 @@
 #
 
 import os
-import subprocess # nosec
+import subprocess  # nosec
 
-BIOS_INFO_KEY = ['BIOS Information', 'Vendor:', 'Version:', 'Release Date:', 'BIOS Revision:']
+BIOS_INFO_KEY = [
+    "BIOS Information",
+    "Vendor:",
+    "Version:",
+    "Release Date:",
+    "BIOS Revision:",
+]
 
-BASE_BOARD_KEY = ['Base Board Information', 'Manufacturer:', 'Product Name:', 'Version:']
+BASE_BOARD_KEY = [
+    "Base Board Information",
+    "Manufacturer:",
+    "Product Name:",
+    "Version:",
+]
 
 
 def check_dmi():
@@ -24,9 +35,9 @@ def print_yel(msg, warn=False, end=True):
     """
     if warn:
         if end:
-            print("\033[1;33mWarning\033[0m:"+msg)
+            print("\033[1;33mWarning\033[0m:" + msg)
         else:
-            print("\033[1;33mWarning\033[0m:"+msg, end="")
+            print("\033[1;33mWarning\033[0m:" + msg, end="")
     else:
         if end:
             print("\033[1;33m{}\033[0m".format(msg))
@@ -40,7 +51,7 @@ def print_red(msg, err=False):
     :param err: the condition if needs to be output the color of red with 'Error'
     """
     if err:
-        print("\033[1;31mError\033[0m:"+msg)
+        print("\033[1;31mError\033[0m:" + msg)
     else:
         print("\033[1;31m{0}\033[0m".format(msg))
 
@@ -49,7 +60,7 @@ def decode_stdout(resource):
     """Decode the information and return one line of the decoded information
     :param resource: it contains information produced by subprocess.Popen method
     """
-    line = resource.stdout.readline().decode('ascii')
+    line = resource.stdout.readline().decode("ascii")
     return line
 
 
@@ -59,9 +70,11 @@ def handle_hw_info(line, hw_info):
     :param hw_info: the list which contains key strings what can describe bios/board
     """
     for board_line in hw_info:
-        if board_line == " ".join(line.split()[0:1]) or \
-                board_line == " ".join(line.split()[0:2]) or \
-                board_line == " ".join(line.split()[0:3]):
+        if (
+            board_line == " ".join(line.split()[0:1])
+            or board_line == " ".join(line.split()[0:2])
+            or board_line == " ".join(line.split()[0:3])
+        ):
             return True
     return False
 
@@ -73,8 +86,8 @@ def handle_pci_dev(line):
     if "Region" in line and "Memory at" in line:
         return True
 
-    if line != '\n':
-        if line.split()[0][2:3] == ':' and line.split()[0][5:6] == '.':
+    if line != "\n":
+        if line.split()[0][2:3] == ":" and line.split()[0][5:6] == ".":
             return True
 
     return False
@@ -84,8 +97,9 @@ def cmd_execute(cmd):
     """Excute cmd and retrun raw information
     :param cmd: command what can be executed in shell
     """
-    res = subprocess.Popen(cmd, shell=True,
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+    res = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True
+    )
 
     return res
 
@@ -94,10 +108,10 @@ def handle_block_dev(line):
     """Handle if it match root device information pattern
     :param line: one line of information which had decoded to 'ASCII'
     """
-    block_format = ''
+    block_format = ""
     for root_type in line.split():
         if "ext4" in root_type or "ext3" in root_type:
-            block_type = ''
+            block_type = ""
             block_dev = line.split()[0]
             for type_str in line.split():
                 if "TYPE=" in type_str:
@@ -124,16 +138,21 @@ def dump_execute(cmd, desc, config):
 
     res = cmd_execute(cmd)
     while True:
-        line = res.stdout.readline().decode('ascii')
-        line = line.replace("&", "&amp;").replace('"', "&quot;") \
-            .replace("'", "&apos;").replace("<", "&lt;").replace(">", "&gt;")
+        line = res.stdout.readline().decode("ascii")
+        line = (
+            line.replace("&", "&amp;")
+            .replace('"', "&quot;")
+            .replace("'", "&apos;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+        )
 
         if not line:
             break
 
         if desc == "PCI_DEVICE":
             if "prog-if" in line:
-                line = line.rsplit('(', 1)[0] + '\n'
+                line = line.rsplit("(", 1)[0] + "\n"
             ret = handle_pci_dev(line)
             if not ret:
                 continue
@@ -162,7 +181,7 @@ def get_output_lines(cmd):
     res_lines = []
     res = cmd_execute(cmd)
     while True:
-        line = res.stdout.readline().decode('ascii')
+        line = res.stdout.readline().decode("ascii")
         if not line:
             break
         res_lines.append(line.strip())

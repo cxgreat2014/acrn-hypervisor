@@ -40,78 +40,88 @@ from docutils.parsers.rst import directives, Directive
 from sphinx.util.docutils import switch_source_input
 
 from sphinx.util import logging
+
 logger = logging.getLogger(__name__)
 
-__version__  = '1.0'
+__version__ = "1.0"
+
 
 class KernelDocDirective(Directive):
     """Extract kernel-doc comments from the specified file"""
+
     required_argument = 1
     optional_arguments = 4
     option_spec = {
-        'doc': directives.unchanged_required,
-        'functions': directives.unchanged,
-        'export': directives.unchanged,
-        'internal': directives.unchanged,
+        "doc": directives.unchanged_required,
+        "functions": directives.unchanged,
+        "export": directives.unchanged,
+        "internal": directives.unchanged,
     }
     has_content = False
 
     def run(self):
         env = self.state.document.settings.env
-        cmd = [env.config.kerneldoc_bin, '-rst', '-enable-lineno']
+        cmd = [env.config.kerneldoc_bin, "-rst", "-enable-lineno"]
 
-        filename = env.config.kerneldoc_srctree + '/' + self.arguments[0]
+        filename = env.config.kerneldoc_srctree + "/" + self.arguments[0]
         export_file_patterns = []
 
         # Tell sphinx of the dependency
         env.note_dependency(os.path.abspath(filename))
 
-        tab_width = self.options.get('tab-width', self.state.document.settings.tab_width)
+        tab_width = self.options.get(
+            "tab-width", self.state.document.settings.tab_width
+        )
 
         # FIXME: make this nicer and more robust against errors
-        if 'export' in self.options:
-            cmd += ['-export']
-            export_file_patterns = str(self.options.get('export')).split()
-        elif 'internal' in self.options:
-            cmd += ['-internal']
-            export_file_patterns = str(self.options.get('internal')).split()
-        elif 'doc' in self.options:
-            cmd += ['-function', str(self.options.get('doc'))]
-        elif 'functions' in self.options:
-            functions = self.options.get('functions').split()
+        if "export" in self.options:
+            cmd += ["-export"]
+            export_file_patterns = str(self.options.get("export")).split()
+        elif "internal" in self.options:
+            cmd += ["-internal"]
+            export_file_patterns = str(self.options.get("internal")).split()
+        elif "doc" in self.options:
+            cmd += ["-function", str(self.options.get("doc"))]
+        elif "functions" in self.options:
+            functions = self.options.get("functions").split()
             if functions:
                 for f in functions:
-                    cmd += ['-function', f]
+                    cmd += ["-function", f]
             else:
-                cmd += ['-no-doc-sections']
+                cmd += ["-no-doc-sections"]
 
         for pattern in export_file_patterns:
-            for f in glob.glob(env.config.kerneldoc_srctree + '/' + pattern):
+            for f in glob.glob(env.config.kerneldoc_srctree + "/" + pattern):
                 env.note_dependency(os.path.abspath(f))
-                cmd += ['-export-file', f]
+                cmd += ["-export-file", f]
 
         cmd += [filename]
 
         try:
-            logger.verbose('calling kernel-doc \'%s\'' % (" ".join(cmd)))
+            logger.verbose("calling kernel-doc '%s'" % (" ".join(cmd)))
 
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = p.communicate()
 
-            out, err = codecs.decode(out, 'utf-8'), codecs.decode(err, 'utf-8')
+            out, err = codecs.decode(out, "utf-8"), codecs.decode(err, "utf-8")
 
             if p.returncode != 0:
                 sys.stderr.write(err)
 
-                logger.warning('kernel-doc \'%s\' failed with return code %d' % (" ".join(cmd), p.returncode))
-                return [nodes.error(None, nodes.paragraph(text = "kernel-doc missing"))]
+                logger.warning(
+                    "kernel-doc '%s' failed with return code %d"
+                    % (" ".join(cmd), p.returncode)
+                )
+                return [nodes.error(None, nodes.paragraph(text="kernel-doc missing"))]
             elif env.config.kerneldoc_verbosity > 0:
                 sys.stderr.write(err)
 
-            lines = statemachine.string2lines(out, tab_width, convert_whitespace=True)
+            lines = statemachine.string2lines(
+                out, tab_width, convert_whitespace=True)
             result = ViewList()
 
-            lineoffset = 0;
+            lineoffset = 0
             line_regex = re.compile("^#define LINENO ([0-9]+)$")
             for line in lines:
                 match = line_regex.search(line)
@@ -124,30 +134,37 @@ class KernelDocDirective(Directive):
                     lineoffset += 1
 
             node = nodes.section()
-            buf = self.state.memo.title_styles, self.state.memo.section_level, self.state.memo.reporter
+            buf = (
+                self.state.memo.title_styles,
+                self.state.memo.section_level,
+                self.state.memo.reporter,
+            )
             self.state.memo.title_styles, self.state.memo.section_level = [], 0
             try:
                 with switch_source_input(self.state, result):
                     self.state.nested_parse(result, 0, node, match_titles=1)
             finally:
-                self.state.memo.title_styles, self.state.memo.section_level, self.state.memo.reporter = buf
+                (
+                    self.state.memo.title_styles,
+                    self.state.memo.section_level,
+                    self.state.memo.reporter,
+                ) = buf
 
             return node.children
 
         except Exception as e:  # pylint: disable=W0703
-            logger.warning('kernel-doc \'%s\' processing failed with: %s' %
-                         (" ".join(cmd), str(e)))
-            return [nodes.error(None, nodes.paragraph(text = "kernel-doc missing"))]
+            logger.warning(
+                "kernel-doc '%s' processing failed with: %s" % (
+                    " ".join(cmd), str(e))
+            )
+            return [nodes.error(None, nodes.paragraph(text="kernel-doc missing"))]
+
 
 def setup(app):
-    app.add_config_value('kerneldoc_bin', None, 'env')
-    app.add_config_value('kerneldoc_srctree', None, 'env')
-    app.add_config_value('kerneldoc_verbosity', 1, 'env')
+    app.add_config_value("kerneldoc_bin", None, "env")
+    app.add_config_value("kerneldoc_srctree", None, "env")
+    app.add_config_value("kerneldoc_verbosity", 1, "env")
 
-    app.add_directive('kernel-doc', KernelDocDirective)
+    app.add_directive("kernel-doc", KernelDocDirective)
 
-    return dict(
-        version = __version__,
-        parallel_read_safe = True,
-        parallel_write_safe = True
-    )
+    return dict(version=__version__, parallel_read_safe=True, parallel_write_safe=True)

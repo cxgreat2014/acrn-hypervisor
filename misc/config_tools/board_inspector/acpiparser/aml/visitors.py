@@ -8,6 +8,7 @@ import sys
 from .tree import Visitor, Direction
 from . import grammar
 
+
 class PrintLayoutVisitor(Visitor):
     @staticmethod
     def __is_printable(s):
@@ -26,10 +27,14 @@ class PrintLayoutVisitor(Visitor):
                 if self.__is_printable(tree.value):
                     print(f" = '{tree.value}'", end="")
         if tree.deferred_range:
-            print(f" (deferred at {hex(tree.deferred_range[0])}, length {hex(tree.deferred_range[1])})", end="")
+            print(
+                f" (deferred at {hex(tree.deferred_range[0])}, length {hex(tree.deferred_range[1])})",
+                end="",
+            )
         if tree.factory:
             print(f" {tree.factory.label}: {tree.factory.seq}", end="")
         print()
+
 
 class ConditionallyUnregisterSymbolVisitor(Visitor):
     def __init__(self, interpreter):
@@ -50,6 +55,7 @@ class ConditionallyUnregisterSymbolVisitor(Visitor):
                 realpath = self.context.realpath(scope, name)
                 self.context.unregister_object(realpath)
             return go_on
+
         return f
 
     def visit(self, tree):
@@ -77,6 +83,7 @@ class ConditionallyUnregisterSymbolVisitor(Visitor):
         else:
             self._visit_topdown(tree)
 
+
 class GenerateBinaryVisitor(Visitor):
     def __init__(self):
         super().__init__(Direction.BOTTOMUP)
@@ -90,13 +97,16 @@ class GenerateBinaryVisitor(Visitor):
             first_byte_value = length & 0xF
             rest_byte_value = length >> 4
             if rest_byte_value <= 0xFF:
-                first_byte = (first_byte_value + (1 << 6)).to_bytes(1, sys.byteorder)
+                first_byte = (first_byte_value + (1 << 6)
+                              ).to_bytes(1, sys.byteorder)
                 rest_bytes = rest_byte_value.to_bytes(1, sys.byteorder)
             elif rest_byte_value <= 0xFFFF:
-                first_byte = (first_byte_value + (2 << 6)).to_bytes(1, sys.byteorder)
+                first_byte = (first_byte_value + (2 << 6)
+                              ).to_bytes(1, sys.byteorder)
                 rest_bytes = rest_byte_value.to_bytes(2, sys.byteorder)
             else:
-                first_byte = (first_byte_value + (3 << 6)).to_bytes(1, sys.byteorder)
+                first_byte = (first_byte_value + (3 << 6)
+                              ).to_bytes(1, sys.byteorder)
                 rest_bytes = rest_byte_value.to_bytes(3, sys.byteorder)
             return first_byte + rest_bytes
 
@@ -137,14 +147,15 @@ class GenerateBinaryVisitor(Visitor):
     def NameSeg(self, tree):
         name = tree.value[:4]
         if len(name) < 4:
-            name += ("_" * (4 - len(name)))
+            name += "_" * (4 - len(name))
         self.acc.append(bytes(name, "ascii"))
 
     def NameString(self, tree):
         acc = bytearray()
         segs = tree.value.lstrip("^\\")
         if len(segs) < len(tree.value):
-            acc.extend(bytes(tree.value[:len(tree.value) - len(segs)], "ascii"))
+            acc.extend(
+                bytes(tree.value[: len(tree.value) - len(segs)], "ascii"))
         if segs:
             nr_dots = segs.count(".")
             if nr_dots == 1:
@@ -175,7 +186,9 @@ class GenerateBinaryVisitor(Visitor):
 
     def default(self, tree):
         assert tree.structure and isinstance(tree.structure, tuple)
-        assert tree.structure != ("value",), f"{tree.label} is not expected to be handled by the default handler"
+        assert tree.structure != (
+            "value",
+        ), f"{tree.label} is not expected to be handled by the default handler"
 
         parts = []
         for child in reversed(tree.children):
@@ -196,4 +209,4 @@ class GenerateBinaryVisitor(Visitor):
             else:
                 parts.append(opcode.to_bytes(2, sys.byteorder))
 
-        self.acc.append(b''.join(reversed(parts)))
+        self.acc.append(b"".join(reversed(parts)))

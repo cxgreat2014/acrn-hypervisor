@@ -10,6 +10,7 @@ from .context import *
 from .exception import *
 from .tree import Tree, Transformer, Direction
 
+
 class Factory:
     @staticmethod
     def hook_pre(context, tree):
@@ -60,17 +61,19 @@ class Factory:
     def decoder(self):
         raise NotImplementedError
 
+
 ################################################################################
 # 20.2.2 Name Objects Encoding
 ################################################################################
+
 
 class NameSegFactory(Factory):
     def __init__(self):
         super().__init__()
         self.__decoder = {}
-        for i in range(ord('A'), ord('Z') + 1):
+        for i in range(ord("A"), ord("Z") + 1):
             self.__decoder[i] = self
-        self.__decoder[ord('_')] = self
+        self.__decoder[ord("_")] = self
         self.label = "NameSeg"
 
     def match(self, context, stream, tree):
@@ -82,16 +85,24 @@ class NameSegFactory(Factory):
     def decoder(self):
         return self.__decoder
 
+
 NameSeg = NameSegFactory()
+
 
 class NameStringFactory(Factory):
     def __init__(self):
         super().__init__()
         self.label = "NameString"
         self.__decoder = {}
-        for i in range(ord('A'), ord('Z') + 1):
+        for i in range(ord("A"), ord("Z") + 1):
             self.__decoder[i] = self
-        for i in [ord('_'), ord('\\'), ord('^'), grammar.AML_DUAL_NAME_PREFIX, grammar.AML_MULTI_NAME_PREFIX]:
+        for i in [
+            ord("_"),
+            ord("\\"),
+            ord("^"),
+            grammar.AML_DUAL_NAME_PREFIX,
+            grammar.AML_MULTI_NAME_PREFIX,
+        ]:
             self.__decoder[i] = self
 
     def match(self, context, stream, tree):
@@ -115,9 +126,9 @@ class NameStringFactory(Factory):
                 if acc and acc[-1] not in ["\\", "^"]:
                     acc += "."
                 acc += stream.get_fixed_length_string(4)
-        elif char == "\x00":    # NullName
+        elif char == "\x00":  # NullName
             pass
-        else:                   # NameSeg
+        else:  # NameSeg
             stream.seek(-1)
             acc += stream.get_fixed_length_string(4)
 
@@ -128,11 +139,13 @@ class NameStringFactory(Factory):
     def decoder(self):
         return self.__decoder
 
+
 NameString = NameStringFactory()
 
 ################################################################################
 # 20.2.3 Data Objects Encoding
 ################################################################################
+
 
 class ConstDataFactory(Factory):
     def __init__(self, label, width):
@@ -146,11 +159,13 @@ class ConstDataFactory(Factory):
         tree.complete_parsing()
         return tree
 
+
 ByteData = ConstDataFactory("ByteData", 1)
 WordData = ConstDataFactory("WordData", 2)
 DWordData = ConstDataFactory("DWordData", 4)
 TWordData = ConstDataFactory("TWordData", 6)
 QWordData = ConstDataFactory("QWordData", 8)
+
 
 class StringFactory(Factory):
     def __init__(self):
@@ -169,7 +184,9 @@ class StringFactory(Factory):
     def decoder(self):
         return {grammar.AML_STRING_PREFIX: self}
 
+
 String = StringFactory()
+
 
 class ByteListFactory(Factory):
     def __init__(self):
@@ -182,22 +199,24 @@ class ByteListFactory(Factory):
         tree.complete_parsing()
         stream.pop_scope()
 
+
 ByteList = ByteListFactory()
 
 ################################################################################
 # 20.2.4 Package Length Encoding
 ################################################################################
 
+
 class PkgLengthFactory(Factory):
     @staticmethod
     def get_package_length(byte_count, value):
         if byte_count == 0:
-            total_size = (value & 0x3F)
+            total_size = value & 0x3F
         else:
             total_size = value & 0x0F
             for i in range(1, byte_count + 1):
                 byte = (value & (0xFF << (i * 8))) >> (i * 8)
-                total_size |= (byte << (i * 8 - 4))
+                total_size |= byte << (i * 8 - 4)
         return total_size
 
     def __init__(self, label, create_new_scope):
@@ -211,7 +230,10 @@ class PkgLengthFactory(Factory):
         assert byte_count <= 3
 
         tree.register_structure(("value",))
-        tree.append_child(self.get_package_length(byte_count, stream.get_integer(byte_count + 1)))
+        tree.append_child(
+            self.get_package_length(
+                byte_count, stream.get_integer(byte_count + 1))
+        )
         tree.complete_parsing()
 
         if self.create_new_scope:
@@ -220,12 +242,14 @@ class PkgLengthFactory(Factory):
             tree.package_range = (stream.current, remaining)
         return tree
 
+
 PkgLength = PkgLengthFactory("PkgLength", True)
 FieldLength = PkgLengthFactory("FieldLength", False)
 
 ################################################################################
 # 20.2.5 Term Objects Encoding
 ################################################################################
+
 
 class MethodInvocationFactory(Factory):
     def __init__(self):
@@ -258,11 +282,13 @@ class MethodInvocationFactory(Factory):
                 self.__decoder[k] = self
         return self.__decoder
 
+
 MethodInvocation = MethodInvocationFactory()
 
 ################################################################################
 # Infrastructure Factories
 ################################################################################
+
 
 class SequenceFactory(Factory):
     def __init__(self, label, seq):
@@ -289,8 +315,7 @@ class SequenceFactory(Factory):
 
         # When a TermList is empty, the stream has already come to the end of the current scope here. Do not attempt to
         # peek the next opcode in such cases.
-        if stream.at_end() and \
-           (self.seq[0][-1] in ["*", "?"]):
+        if stream.at_end() and (self.seq[0][-1] in ["*", "?"]):
             stream.pop_scope()
             tree.complete_parsing()
             return tree
@@ -303,7 +328,7 @@ class SequenceFactory(Factory):
         to_pop_stream_scope = False
         completed = True
 
-        for i,elem in enumerate(self.seq):
+        for i, elem in enumerate(self.seq):
             pos = stream.current
             try:
                 if isinstance(elem, int):  # The leading opcode
@@ -342,7 +367,9 @@ class SequenceFactory(Factory):
                     if child.label == "PkgLength":
                         to_pop_stream_scope = True
                         if child.package_range:
-                            package_end = child.package_range[0] + child.package_range[1]
+                            package_end = (
+                                child.package_range[0] + child.package_range[1]
+                            )
                             context.enter_deferred_mode()
                             to_recover_from_deferred_mode = True
                     elif child.label == "NameString":
@@ -353,7 +380,9 @@ class SequenceFactory(Factory):
                     if to_recover_from_deferred_mode:
                         tree.deferred_range = (pos, package_end - pos)
                         tree.context_scope = context.get_scope()
-                        tree.factory = SequenceFactory(f"{self.label}.deferred", self.seq[i:])
+                        tree.factory = SequenceFactory(
+                            f"{self.label}.deferred", self.seq[i:]
+                        )
                         stream.seek(package_end, absolute=True)
                         completed = False
                         break
@@ -377,6 +406,7 @@ class SequenceFactory(Factory):
                 for k in globals()[self.seq[0]].decoder.keys():
                     self.__decoder[k] = self
         return self.__decoder
+
 
 class OptionFactory(Factory):
     def __init__(self, label, opts):
@@ -404,13 +434,23 @@ class OptionFactory(Factory):
                 self.__decoder.update(globals()[opt].decoder)
         return self.__decoder
 
+
 class DeferredExpansion(Transformer):
     def __init__(self, context):
         super().__init__(Direction.TOPDOWN)
         self.context = context
 
-        nodes = ["DefScope", "DefDevice", "DefMethod", "DefPowerRes", "DefProcessor", "DefThermalZone",
-                 "DefIfElse", "DefElse", "DefWhile"]
+        nodes = [
+            "DefScope",
+            "DefDevice",
+            "DefMethod",
+            "DefPowerRes",
+            "DefProcessor",
+            "DefThermalZone",
+            "DefIfElse",
+            "DefElse",
+            "DefWhile",
+        ]
 
         for i in nodes:
             setattr(self, i, self.__expand_deferred_range)
@@ -431,15 +471,20 @@ class DeferredExpansion(Transformer):
                 tree.factory = None
                 tree.complete_parsing()
             except (DecodeError, DeferLater, ScopeMismatch, UndefinedSymbol) as e:
-                logging.info(f"expansion of {tree.label} at {hex(tree.deferred_range[0])} failed due to: " + str(e))
+                logging.info(
+                    f"expansion of {tree.label} at {hex(tree.deferred_range[0])} failed due to: "
+                    + str(e)
+                )
 
             self.context.pop_scope()
 
         return tree
 
+
 ################################################################################
 # Hook functions
 ################################################################################
+
 
 def DefAlias_hook_post(context, tree):
     source = tree.SourceObject.value
@@ -447,12 +492,15 @@ def DefAlias_hook_post(context, tree):
     sym = AliasDecl(alias, source, tree)
     context.register_symbol(sym)
 
+
 def DefName_hook_named(context, tree, name):
     sym = NamedDecl(name, tree)
     context.register_symbol(sym)
 
+
 def DefScope_hook_named(context, tree, name):
     context.change_scope(name)
+
 
 def DefScope_hook_post(context, tree):
     context.pop_scope()
@@ -463,38 +511,46 @@ def DefCreateBitField_hook_named(context, tree, name):
     sym = FieldDecl(name, 1, tree)
     context.register_symbol(sym)
 
+
 def DefCreateByteField_hook_named(context, tree, name):
     name = tree.children[2].value
     sym = FieldDecl(name, 8, tree)
     context.register_symbol(sym)
+
 
 def DefCreateDWordField_hook_named(context, tree, name):
     name = tree.children[2].value
     sym = FieldDecl(name, 32, tree)
     context.register_symbol(sym)
 
+
 def DefCreateField_hook_named(context, tree, name):
     name = tree.children[3].value
     sym = FieldDecl(name, 0, tree)
     context.register_symbol(sym)
+
 
 def DefCreateQWordField_hook_named(context, tree, name):
     name = tree.children[2].value
     sym = FieldDecl(name, 64, tree)
     context.register_symbol(sym)
 
+
 def DefCreateWordField_hook_named(context, tree, name):
     name = tree.children[2].value
     sym = FieldDecl(name, 16, tree)
     context.register_symbol(sym)
+
 
 def DefDevice_hook_named(context, tree, name):
     sym = DeviceDecl(name, tree)
     context.register_symbol(sym)
     context.change_scope(name)
 
+
 def DefDevice_hook_post(context, tree):
     context.pop_scope()
+
 
 def DefExternal_hook_post(context, tree):
     name = tree.NameString.value
@@ -507,15 +563,17 @@ def DefExternal_hook_post(context, tree):
         sym = NamedDecl(name, tree)
     context.register_symbol(sym)
 
+
 access_width_map = {
-    0: 8,    # AnyAcc
-    1: 8,    # ByteAcc
-    2: 16,   # WordAcc
-    3: 32,   # DWordAcc
-    4: 64,   # QWordAcc
-    5: 8,    # BufferAcc
+    0: 8,  # AnyAcc
+    1: 8,  # ByteAcc
+    2: 16,  # WordAcc
+    3: 32,  # DWordAcc
+    4: 64,  # QWordAcc
+    5: 8,  # BufferAcc
     # The other values are reserved
 }
+
 
 def DefField_hook_post(context, tree):
     # Update the fields with region & offset info
@@ -539,6 +597,7 @@ def DefField_hook_post(context, tree):
         else:
             break
 
+
 def DefIndexField_hook_post(context, tree):
     # Update the fields with region & offset info
     index_register = context.lookup_symbol(tree.IndexName.value)
@@ -553,7 +612,9 @@ def DefIndexField_hook_post(context, tree):
             length = field.FieldLength.value
             sym = context.lookup_symbol(name)
             assert isinstance(sym, OperationFieldDecl)
-            sym.set_indexed_location(index_register, data_register, bit_offset, access_width)
+            sym.set_indexed_location(
+                index_register, data_register, bit_offset, access_width
+            )
             bit_offset += length
         elif field.label == "ReservedField":
             length = field.FieldLength.value
@@ -561,14 +622,17 @@ def DefIndexField_hook_post(context, tree):
         else:
             break
 
+
 def NamedField_hook_post(context, tree):
     name = tree.NameSeg.value
     length = tree.FieldLength.value
     sym = OperationFieldDecl(name, length, tree)
     context.register_symbol(sym)
 
+
 def DefMethod_hook_named(context, tree, name):
     context.change_scope(name)
+
 
 def DefMethod_hook_post(context, tree):
     context.pop_scope()
@@ -580,29 +644,36 @@ def DefMethod_hook_post(context, tree):
         sym = MethodDecl(name, nargs, tree)
         context.register_symbol(sym)
 
+
 def DefOpRegion_hook_named(context, tree, name):
     sym = OperationRegionDecl(name, tree)
     context.register_symbol(sym)
+
 
 def DefPowerRes_hook_named(context, tree, name):
     sym = NamedDecl(name, tree)
     context.register_symbol(sym)
     context.change_scope(name)
 
+
 def DefPowerRes_hook_post(context, tree):
     context.pop_scope()
+
 
 def DefThermalZone_hook_named(context, tree, name):
     sym = NamedDecl(name, tree)
     context.register_symbol(sym)
     context.change_scope(name)
 
+
 def DefThermalZone_hook_post(context, tree):
     context.pop_scope()
+
 
 ################################################################################
 # Instantiate parsers
 ################################################################################
+
 
 def register_hooks(factory, label):
     if f"{sym}_hook_pre" in globals().keys():
@@ -611,6 +682,7 @@ def register_hooks(factory, label):
         factory.hook_named = globals()[f"{sym}_hook_named"]
     if f"{sym}_hook_post" in globals().keys():
         factory.hook_post = globals()[f"{sym}_hook_post"]
+
 
 for sym in dir(grammar):
     # Ignore builtin members and opcode constants

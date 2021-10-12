@@ -3,6 +3,7 @@
 import argparse
 import lxml.etree
 
+
 def mmio_regions(etree):
     ret = []
 
@@ -14,7 +15,8 @@ def mmio_regions(etree):
         obj = dev.get("object")
         ret.append((obj, int(base, base=16), int(top, base=16)))
 
-    return sorted(ret, key=lambda x:(x[1], x[2]))
+    return sorted(ret, key=lambda x: (x[1], x[2]))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

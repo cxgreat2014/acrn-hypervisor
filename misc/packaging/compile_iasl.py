@@ -1,26 +1,37 @@
 # -*- coding: utf-8 -*-
-#* Copyright (c) 2020 Intel Corporation
-import os,sys,copy,json
+# * Copyright (c) 2020 Intel Corporation
+import os
+import sys
+import copy
+import json
 import subprocess
 import datetime
 import time
 
-os.system('sudo -E apt-get install iasl')
+os.system("sudo -E apt-get install iasl")
 
-if os.path.exists('iasl_build'):
-	os.system('rm -rf iasl_build')
-os.system('mkdir -p iasl_build')
+if os.path.exists("iasl_build"):
+    os.system("rm -rf iasl_build")
+os.system("mkdir -p iasl_build")
 
-cmd = "cd iasl_build" + "&&" +"wget https://acpica.org/sites/acpica/files/acpica-unix-20191018.tar.gz"
+cmd = (
+    "cd iasl_build"
+    + "&&"
+    + "wget https://acpica.org/sites/acpica/files/acpica-unix-20191018.tar.gz"
+)
 os.system(cmd)
 
-cmd = "cd iasl_build" + "&&" +"tar zxvf acpica-unix-20191018.tar.gz"
+cmd = "cd iasl_build" + "&&" + "tar zxvf acpica-unix-20191018.tar.gz"
 os.system(cmd)
 
-cmd = "cd iasl_build/acpica-unix-20191018" + "&&" +"make clean"
+cmd = "cd iasl_build/acpica-unix-20191018" + "&&" + "make clean"
 os.system(cmd)
 
-cmd = "cd iasl_build/acpica-unix-20191018" + "&&" +"make iasl"
+cmd = "cd iasl_build/acpica-unix-20191018" + "&&" + "make iasl"
 os.system(cmd)
 
-cmd = "cd iasl_build/acpica-unix-20191018" + "&&" +"cp ./generate/unix/bin/iasl /usr/sbin/"
+cmd = (
+    "cd iasl_build/acpica-unix-20191018"
+    + "&&"
+    + "cp ./generate/unix/bin/iasl /usr/sbin/"
+)

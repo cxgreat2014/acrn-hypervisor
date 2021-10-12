@@ -7,21 +7,23 @@ import common
 import board_cfg_lib
 import scenario_cfg_lib
 
-BOARD_INFO_DEFINE="""#ifndef BOARD_INFO_H
+BOARD_INFO_DEFINE = """#ifndef BOARD_INFO_H
 #define BOARD_INFO_H
 """
 
-BOARD_INFO_ENDIF="""
+BOARD_INFO_ENDIF = """
 #endif /* BOARD_INFO_H */"""
+
 
 def gen_known_caps_pci_head(config):
 
     bdf_list_len = 0
     known_caps_pci_devs = board_cfg_lib.get_known_caps_pci_devs()
-    for dev,bdf_list in known_caps_pci_devs.items():
+    for dev, bdf_list in known_caps_pci_devs.items():
         if dev == "VMSIX":
             bdf_list_len = len(bdf_list)
-    print("#define MAX_VMSIX_ON_MSI_PDEVS_NUM\t{}U".format(bdf_list_len), file=config)
+    print("#define MAX_VMSIX_ON_MSI_PDEVS_NUM\t{}U".format(
+        bdf_list_len), file=config)
 
 
 def find_hi_mmio_window(config):
@@ -31,14 +33,16 @@ def find_hi_mmio_window(config):
     mmio_max = 0
     is_hi_mmio = False
 
-    iomem_lines = board_cfg_lib.get_info(common.BOARD_INFO_FILE, "<IOMEM_INFO>", "</IOMEM_INFO>")
+    iomem_lines = board_cfg_lib.get_info(
+        common.BOARD_INFO_FILE, "<IOMEM_INFO>", "</IOMEM_INFO>"
+    )
 
     for line in iomem_lines:
         if "PCI Bus" not in line:
             continue
 
-        line_start_addr = int(line.split('-')[0], 16)
-        line_end_addr = int(line.split('-')[1].split()[0], 16)
+        line_start_addr = int(line.split("-")[0], 16)
+        line_end_addr = int(line.split("-")[1].split()[0], 16)
         if line_start_addr < common.SIZE_4G and line_end_addr < common.SIZE_4G:
             continue
         elif line_start_addr < common.SIZE_4G and line_end_addr >= common.SIZE_4G:
@@ -59,12 +63,24 @@ def find_hi_mmio_window(config):
 
     print("", file=config)
     if is_hi_mmio:
-        print("#define HI_MMIO_START\t\t\t0x%xUL" % common.round_down(mmio_min, common.SIZE_G), file=config)
-        print("#define HI_MMIO_END\t\t\t0x%xUL" % common.round_up(mmio_max, common.SIZE_G), file=config)
+        print(
+            "#define HI_MMIO_START\t\t\t0x%xUL"
+            % common.round_down(mmio_min, common.SIZE_G),
+            file=config,
+        )
+        print(
+            "#define HI_MMIO_END\t\t\t0x%xUL"
+            % common.round_up(mmio_max, common.SIZE_G),
+            file=config,
+        )
     else:
         print("#define HI_MMIO_START\t\t\t~0UL", file=config)
         print("#define HI_MMIO_END\t\t\t0UL", file=config)
-    print("#define HI_MMIO_SIZE\t\t\t{}UL".format(hex(board_cfg_lib.HI_MMIO_OFFSET)), file=config)
+    print(
+        "#define HI_MMIO_SIZE\t\t\t{}UL".format(
+            hex(board_cfg_lib.HI_MMIO_OFFSET)),
+        file=config,
+    )
 
 
 def generate_file(config):
@@ -84,18 +100,28 @@ def generate_file(config):
 
     # define MAX_HIDDEN_PDEVS_NUM
     if board_cfg_lib.BOARD_NAME in list(board_cfg_lib.KNOWN_HIDDEN_PDEVS_BOARD_DB):
-        print("#define MAX_HIDDEN_PDEVS_NUM\t\t{}U".format(len(board_cfg_lib.KNOWN_HIDDEN_PDEVS_BOARD_DB[board_cfg_lib.BOARD_NAME])), file=config)
+        print(
+            "#define MAX_HIDDEN_PDEVS_NUM\t\t{}U".format(
+                len(
+                    board_cfg_lib.KNOWN_HIDDEN_PDEVS_BOARD_DB[board_cfg_lib.BOARD_NAME])
+            ),
+            file=config,
+        )
     else:
         print("#define MAX_HIDDEN_PDEVS_NUM\t\t0U", file=config)
 
     # generate HI_MMIO_START/HI_MMIO_END
     find_hi_mmio_window(config)
 
-    p2sb = common.get_leaf_tag_map_bool(common.SCENARIO_INFO_FILE, "mmio_resources", "p2sb")
-    if (common.VM_TYPES.get(0) is not None and
-        scenario_cfg_lib.VM_DB[common.VM_TYPES[0]]['load_type'] == "PRE_LAUNCHED_VM"
+    p2sb = common.get_leaf_tag_map_bool(
+        common.SCENARIO_INFO_FILE, "mmio_resources", "p2sb"
+    )
+    if (
+        common.VM_TYPES.get(0) is not None
+        and scenario_cfg_lib.VM_DB[common.VM_TYPES[0]]["load_type"] == "PRE_LAUNCHED_VM"
         and board_cfg_lib.is_p2sb_passthru_possible()
-        and p2sb.get(0, False)):
+        and p2sb.get(0, False)
+    ):
         print("", file=config)
         print("#define P2SB_VGPIO_DM_ENABLED", file=config)
 

@@ -30,17 +30,20 @@ Documentation frequently writes bitfields as the inclusive range [msb:lsb];
 this module provides functions to work with bitfields using msb and lsb rather
 than manually computing shifts and masks from those."""
 
+
 def bitfield_max(msb, lsb=None):
     """Return the largest value that fits in the bitfield [msb:lsb] (or [msb] if lsb is None)"""
     if lsb is None:
         lsb = msb
     return (1 << (msb - lsb + 1)) - 1
 
+
 def bitmask(msb, lsb=None):
     """Creates a mask with bits [msb:lsb] (or [msb] if lsb is None) set."""
     if lsb is None:
         lsb = msb
     return bitfield_max(msb, lsb) << lsb
+
 
 def bitfield(value, msb, lsb=None):
     """Shift value to fit in the bitfield [msb:lsb] (or [msb] if lsb is None).
@@ -53,14 +56,18 @@ def bitfield(value, msb, lsb=None):
             field = "[{0}]".format(msb)
         else:
             field = "[{0}:{1}]".format(msb, lsb)
-        raise OverflowError("Value {value:#x} too big for bitfield {field}".format(**locals()))
+        raise OverflowError(
+            "Value {value:#x} too big for bitfield {field}".format(**locals())
+        )
     return value << lsb
+
 
 def getbits(value, msb, lsb=None):
     """From the specified value, extract the bitfield [msb:lsb] (or [msb] if lsb is None)"""
     if lsb is None:
         lsb = msb
     return (value >> lsb) & bitfield_max(msb, lsb)
+
 
 def setbits(value, fieldvalue, msb, lsb=None):
     """In the specified value, set the bitfield [msb:lsb] (or [msb] if lsb is None) to fieldvalue"""
