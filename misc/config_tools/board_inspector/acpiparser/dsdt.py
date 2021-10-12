@@ -13,6 +13,7 @@ from acpiparser.aml.context import Context
 from acpiparser.aml.interpreter import ConcreteInterpreter
 from acpiparser.aml.visitors import ConditionallyUnregisterSymbolVisitor
 
+
 def DSDT(val):
     table_dir = os.path.dirname(val)
     if not table_dir:
@@ -34,10 +35,12 @@ def DSDT(val):
         raise
 
     context.skip_external_on_lookup()
-    visitor = ConditionallyUnregisterSymbolVisitor(ConcreteInterpreter(context))
+    visitor = ConditionallyUnregisterSymbolVisitor(
+        ConcreteInterpreter(context))
     for tree in context.trees.values():
         visitor.visit(tree)
     return context
+
 
 def parse_tree(label, data):
     context = Context()

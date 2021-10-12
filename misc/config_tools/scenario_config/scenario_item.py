@@ -7,8 +7,10 @@ import common
 import board_cfg_lib
 import scenario_cfg_lib
 
+
 class HwInfo:
-    """ This is Abstract of class of Hardware information """
+    """This is Abstract of class of Hardware information"""
+
     processor_val = []
     clos_val = []
     root_dev_val = []
@@ -48,7 +50,9 @@ class HwInfo:
         """
         self.clos_val = []
 
-        (rdt_resources, rdt_res_clos_max, _) = board_cfg_lib.clos_info_parser(self.board_info)
+        (rdt_resources, rdt_res_clos_max, _) = board_cfg_lib.clos_info_parser(
+            self.board_info
+        )
         if len(rdt_resources) != 0 and len(rdt_res_clos_max) != 0:
             common_clos_max = min(rdt_res_clos_max)
 
@@ -69,7 +73,8 @@ class HwInfo:
 
 
 class CfgOsKern:
-    """ This is Abstract of class of configuration of vm os kernel setting """
+    """This is Abstract of class of configuration of vm os kernel setting"""
+
     kern_name = {}
     kern_type = {}
     kern_mod = {}
@@ -86,35 +91,52 @@ class CfgOsKern:
         Get all items which belong to this class
         :return: None
         """
-        self.kern_name = common.get_leaf_tag_map(self.scenario_info, "os_config", "name")
+        self.kern_name = common.get_leaf_tag_map(
+            self.scenario_info, "os_config", "name"
+        )
         self.kern_type = common.get_leaf_tag_map(
-            self.scenario_info, "os_config", "kern_type")
+            self.scenario_info, "os_config", "kern_type"
+        )
         self.kern_mod = common.get_leaf_tag_map(
-            self.scenario_info, "os_config", "kern_mod")
+            self.scenario_info, "os_config", "kern_mod"
+        )
         self.kern_args = common.get_leaf_tag_map(
-            self.scenario_info, "os_config", "bootargs")
+            self.scenario_info, "os_config", "bootargs"
+        )
         self.kern_load_addr = common.get_leaf_tag_map(
-            self.scenario_info, "os_config", "kern_load_addr")
+            self.scenario_info, "os_config", "kern_load_addr"
+        )
         self.kern_entry_addr = common.get_leaf_tag_map(
-            self.scenario_info, "os_config", "kern_entry_addr")
+            self.scenario_info, "os_config", "kern_entry_addr"
+        )
         self.ramdisk_mod = common.get_leaf_tag_map(
-            self.scenario_info, "os_config", "ramdisk_mod")
+            self.scenario_info, "os_config", "ramdisk_mod"
+        )
 
     def check_item(self):
         """
         Check all items in this class
         :return: None
         """
-        scenario_cfg_lib.os_kern_name_check(self.kern_name, "os_config", "name")
-        scenario_cfg_lib.os_kern_type_check(self.kern_type, "os_config", "kern_type")
-        scenario_cfg_lib.os_kern_mod_check(self.kern_mod, "os_config", "kern_mod")
-        scenario_cfg_lib.os_kern_args_check(self.kern_args, "os_config", "kern_args")
-        scenario_cfg_lib.os_kern_load_addr_check(self.kern_type, self.kern_load_addr, "os_config", "kern_load_addr")
-        scenario_cfg_lib.os_kern_entry_addr_check(self.kern_type, self.kern_entry_addr, "os_config", "kern_entry_addr")
+        scenario_cfg_lib.os_kern_name_check(
+            self.kern_name, "os_config", "name")
+        scenario_cfg_lib.os_kern_type_check(
+            self.kern_type, "os_config", "kern_type")
+        scenario_cfg_lib.os_kern_mod_check(
+            self.kern_mod, "os_config", "kern_mod")
+        scenario_cfg_lib.os_kern_args_check(
+            self.kern_args, "os_config", "kern_args")
+        scenario_cfg_lib.os_kern_load_addr_check(
+            self.kern_type, self.kern_load_addr, "os_config", "kern_load_addr"
+        )
+        scenario_cfg_lib.os_kern_entry_addr_check(
+            self.kern_type, self.kern_entry_addr, "os_config", "kern_entry_addr"
+        )
 
 
 class VuartInfo:
-    """ This is Abstract of class of vm vuart setting """
+    """This is Abstract of class of vm vuart setting"""
+
     v0_vuart = {}
     v1_vuart = {}
     pci_vuarts = {}
@@ -123,7 +145,7 @@ class VuartInfo:
         self.scenario_info = scenario_file
 
     def style_check_1(self):
-        """ This is public method for style check"""
+        """This is public method for style check"""
         self.v1_vuart = []
 
     def get_info(self):
@@ -142,10 +164,13 @@ class VuartInfo:
         """
         scenario_cfg_lib.check_board_private_info()
         scenario_cfg_lib.check_vuart(self.v0_vuart, self.v1_vuart)
-        scenario_cfg_lib.check_pci_vuart(self.pci_vuarts, self.v0_vuart, self.v1_vuart)
+        scenario_cfg_lib.check_pci_vuart(
+            self.pci_vuarts, self.v0_vuart, self.v1_vuart)
+
 
 class MemInfo:
-    """ This is Abstract of class of memory setting information """
+    """This is Abstract of class of memory setting information"""
+
     mem_start_hpa = {}
     mem_size = {}
     mem_start_hpa2 = {}
@@ -160,27 +185,35 @@ class MemInfo:
         :return: None
         """
         self.mem_start_hpa = common.get_leaf_tag_map(
-            self.scenario_info, "memory", "start_hpa")
+            self.scenario_info, "memory", "start_hpa"
+        )
         self.mem_size = common.get_leaf_tag_map(
             self.scenario_info, "memory", "size")
         self.mem_start_hpa2 = common.get_leaf_tag_map(
-            self.scenario_info, "memory", "start_hpa2")
+            self.scenario_info, "memory", "start_hpa2"
+        )
         self.mem_size_hpa2 = common.get_leaf_tag_map(
-            self.scenario_info, "memory", "size_hpa2")
+            self.scenario_info, "memory", "size_hpa2"
+        )
 
     def check_item(self):
         """
         Check all items in this class
         :return: None
         """
-        scenario_cfg_lib.mem_start_hpa_check(self.mem_start_hpa, "memory", "start_hpa")
+        scenario_cfg_lib.mem_start_hpa_check(
+            self.mem_start_hpa, "memory", "start_hpa")
         scenario_cfg_lib.mem_size_check(self.mem_size, "memory", "size")
-        scenario_cfg_lib.mem_start_hpa_check(self.mem_start_hpa2, "memory", "start_hpa2")
-        scenario_cfg_lib.mem_size_check(self.mem_size_hpa2, "memory", "size_hpa2")
+        scenario_cfg_lib.mem_start_hpa_check(
+            self.mem_start_hpa2, "memory", "start_hpa2"
+        )
+        scenario_cfg_lib.mem_size_check(
+            self.mem_size_hpa2, "memory", "size_hpa2")
 
 
 class CfgPci:
-    """ This is Abstract of class of PCi devices setting information """
+    """This is Abstract of class of PCi devices setting information"""
+
     pt_pci_num = {}
     pci_devs = {}
 
@@ -199,9 +232,9 @@ class CfgPci:
         Get pci devices items
         :return: None
         """
-        pci_items = common.get_leaf_tag_map(self.scenario_info, "pci_devs", "pci_dev")
+        pci_items = common.get_leaf_tag_map(
+            self.scenario_info, "pci_devs", "pci_dev")
         self.pci_devs = scenario_cfg_lib.get_pt_pci_devs(pci_items)
-
 
     def get_info(self):
         """
@@ -212,7 +245,7 @@ class CfgPci:
         self.get_pt_pci_dev_num()
 
     def check_item(self):
-        """ Check all items in this class
+        """Check all items in this class
         :return: None
         """
         scenario_cfg_lib.pci_devs_check(self.pci_devs, "pci_devs", "pci_dev")
@@ -226,13 +259,16 @@ class EpcSection:
         self.scenario_info = scenario_info
 
     def get_info(self):
-        self.base = common.get_leaf_tag_map(self.scenario_info, "epc_section", "base")
-        self.size = common.get_leaf_tag_map(self.scenario_info, "epc_section", "size")
+        self.base = common.get_leaf_tag_map(
+            self.scenario_info, "epc_section", "base")
+        self.size = common.get_leaf_tag_map(
+            self.scenario_info, "epc_section", "size")
 
 
 class ShareMem:
-    """ This is the class to get Share Memory regions for VMs """
-    shmem_enabled = 'n'
+    """This is the class to get Share Memory regions for VMs"""
+
+    shmem_enabled = "n"
     raw_shmem_regions = []
     shmem_regions = {}
     shmem_num = {}
@@ -247,36 +283,50 @@ class ShareMem:
         :return:
         """
         self.raw_shmem_regions = ivshmem_regions
-        self.shmem_enabled = common.get_hv_item_tag(self.scenario_info, "FEATURES", "IVSHMEM", "IVSHMEM_ENABLED")
-        self.shmem_regions = scenario_cfg_lib.get_shmem_regions(ivshmem_regions)
+        self.shmem_enabled = common.get_hv_item_tag(
+            self.scenario_info, "FEATURES", "IVSHMEM", "IVSHMEM_ENABLED"
+        )
+        self.shmem_regions = scenario_cfg_lib.get_shmem_regions(
+            ivshmem_regions)
         self.shmem_num = scenario_cfg_lib.get_shmem_num(self.shmem_regions)
 
     def check_items(self):
-        '''
+        """
         check the configurations for share memories.
         :return:
-        '''
-        if self.shmem_enabled == 'y':
-            vm_type_info = common.get_leaf_tag_map(self.scenario_info, "vm_type")
-            scenario_cfg_lib.share_mem_check(self.shmem_regions, self.raw_shmem_regions, vm_type_info,
-                                         "FEATURES", "IVSHMEM", "IVSHMEM_REGION")
+        """
+        if self.shmem_enabled == "y":
+            vm_type_info = common.get_leaf_tag_map(
+                self.scenario_info, "vm_type")
+            scenario_cfg_lib.share_mem_check(
+                self.shmem_regions,
+                self.raw_shmem_regions,
+                vm_type_info,
+                "FEATURES",
+                "IVSHMEM",
+                "IVSHMEM_REGION",
+            )
 
 
 class LoadOrderNum:
-    """ This is Abstract of VM number for different load order """
+    """This is Abstract of VM number for different load order"""
+
     def __init__(self):
         self.pre_vm = 0
         self.sos_vm = 0
         self.post_vm = 0
 
     def get_info(self, load_vm):
-        self.pre_vm = scenario_cfg_lib.get_load_vm_cnt(load_vm, "PRE_LAUNCHED_VM")
+        self.pre_vm = scenario_cfg_lib.get_load_vm_cnt(
+            load_vm, "PRE_LAUNCHED_VM")
         self.sos_vm = scenario_cfg_lib.get_load_vm_cnt(load_vm, "SOS_VM")
-        self.post_vm = scenario_cfg_lib.get_load_vm_cnt(load_vm, "POST_LAUNCHED_VM")
+        self.post_vm = scenario_cfg_lib.get_load_vm_cnt(
+            load_vm, "POST_LAUNCHED_VM")
 
 
 class MmioResourcesInfo:
-    """ This is Abstract of class of mmio resource setting information """
+    """This is Abstract of class of mmio resource setting information"""
+
     p2sb = False
 
     def __init__(self, scenario_file):
@@ -287,8 +337,12 @@ class MmioResourcesInfo:
         Get all items which belong to this class
         :return: None
         """
-        self.p2sb = common.get_leaf_tag_map_bool(self.scenario_info, "mmio_resources", "p2sb")
-        self.tpm2 = common.get_leaf_tag_map_bool(self.scenario_info, "mmio_resources", "TPM2")
+        self.p2sb = common.get_leaf_tag_map_bool(
+            self.scenario_info, "mmio_resources", "p2sb"
+        )
+        self.tpm2 = common.get_leaf_tag_map_bool(
+            self.scenario_info, "mmio_resources", "TPM2"
+        )
 
     def check_item(self):
         """
@@ -299,7 +353,8 @@ class MmioResourcesInfo:
 
 
 class PtIntxInfo:
-    """ This is Abstract of class of pt intx setting information """
+    """This is Abstract of class of pt intx setting information"""
+
     phys_gsi = {}
     virt_gsi = {}
 
@@ -311,7 +366,8 @@ class PtIntxInfo:
         Get all items which belong to this class
         :return: None
         """
-        self.phys_gsi, self.virt_gsi = common.get_pt_intx_table(self.scenario_info)
+        self.phys_gsi, self.virt_gsi = common.get_pt_intx_table(
+            self.scenario_info)
 
     def check_item(self):
         """
@@ -323,7 +379,8 @@ class PtIntxInfo:
 
 
 class VmInfo:
-    """ This is Abstract of class of VM setting """
+    """This is Abstract of class of VM setting"""
+
     name = {}
     load_vm = {}
     clos_per_vm = {}
@@ -345,20 +402,22 @@ class VmInfo:
         self.mmio_resource_info = MmioResourcesInfo(self.scenario_info)
         self.pt_intx_info = PtIntxInfo(self.scenario_info)
 
-
     def get_info(self):
         """
         Get all items which belong to this class
         :return: None
         """
         self.name = common.get_leaf_tag_map(self.scenario_info, "name")
-        self.load_vm= common.get_leaf_tag_map(self.scenario_info, "vm_type")
+        self.load_vm = common.get_leaf_tag_map(self.scenario_info, "vm_type")
         self.guest_flags = common.get_leaf_tag_map(
-            self.scenario_info, "guest_flags", "guest_flag")
+            self.scenario_info, "guest_flags", "guest_flag"
+        )
         self.cpus_per_vm = common.get_leaf_tag_map(
-            self.scenario_info, "cpu_affinity", "pcpu_id")
+            self.scenario_info, "cpu_affinity", "pcpu_id"
+        )
         self.clos_per_vm = common.get_leaf_tag_map(
-            self.scenario_info, "clos", "vcpu_clos")
+            self.scenario_info, "clos", "vcpu_clos"
+        )
 
         self.epc_section.get_info()
         self.mem_info.get_info()
@@ -398,9 +457,14 @@ class VmInfo:
         """
         scenario_cfg_lib.vm_name_check(self.name, "name")
         scenario_cfg_lib.load_vm_check(self.load_vm, "load_vm")
-        scenario_cfg_lib.guest_flag_check(self.guest_flags, "guest_flags", "guest_flag")
-        err_dic = scenario_cfg_lib.vm_cpu_affinity_check(self.scenario_info, self.cpus_per_vm, "pcpu_id")
-        scenario_cfg_lib.vcpu_clos_check(self.cpus_per_vm, self.clos_per_vm, "clos", "vcpu_clos")
+        scenario_cfg_lib.guest_flag_check(
+            self.guest_flags, "guest_flags", "guest_flag")
+        err_dic = scenario_cfg_lib.vm_cpu_affinity_check(
+            self.scenario_info, self.cpus_per_vm, "pcpu_id"
+        )
+        scenario_cfg_lib.vcpu_clos_check(
+            self.cpus_per_vm, self.clos_per_vm, "clos", "vcpu_clos"
+        )
 
         self.mem_info.check_item()
         self.os_cfg.check_item()

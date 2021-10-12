@@ -13,6 +13,7 @@ PCI_HEADER = r"""
 PCI_END_HEADER = r"""
 #endif /* PCI_DEVICES_H_ */"""
 
+
 def write_pbdf(i_cnt, bdf, bar_attr, config):
     """
     Parser and generate pbdf
@@ -24,12 +25,16 @@ def write_pbdf(i_cnt, bdf, bar_attr, config):
     tmp_sub_name = board_cfg_lib.get_sub_pci_name(i_cnt, bar_attr)
     board_cfg_lib.PCI_DEV_BAR_DESC.pci_dev_dic[bdf].name_w_i_cnt = tmp_sub_name
 
-    bus = int(bdf.split(':')[0], 16)
-    dev = int(bdf.split(':')[1].split('.')[0], 16)
-    fun = int(bdf.split('.')[1], 16)
+    bus = int(bdf.split(":")[0], 16)
+    dev = int(bdf.split(":")[1].split(".")[0], 16)
+    fun = int(bdf.split(".")[1], 16)
     print("#define %-32s" % tmp_sub_name, end="", file=config)
-    print("        .pbdf.bits = {{.b = 0x{:02X}U, .d = 0x{:02X}U, .f = 0x{:02X}U}}".format(
-        bus, dev, fun), file=config)
+    print(
+        "        .pbdf.bits = {{.b = 0x{:02X}U, .d = 0x{:02X}U, .f = 0x{:02X}U}}".format(
+            bus, dev, fun
+        ),
+        file=config,
+    )
 
 
 def generate_file(config):
@@ -57,7 +62,7 @@ def generate_file(config):
             else:
                 continue
 
-            print("",file=config)
+            print("", file=config)
             write_pbdf(i_cnt, bdf, bar_attr, config)
 
             i_cnt += 1

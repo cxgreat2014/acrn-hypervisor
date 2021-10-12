@@ -22,30 +22,37 @@ from acpiparser.rdt import *
 
 from extractors.helpers import add_child, get_node
 
-device_objects = defaultdict(lambda: {})                       # device_path -> object_name -> tree
-device_deps = defaultdict(lambda: defaultdict(lambda: set()))     # device_path -> dep_type -> {device_path}
+device_objects = defaultdict(lambda: {})  # device_path -> object_name -> tree
+device_deps = defaultdict(
+    lambda: defaultdict(lambda: set())
+)  # device_path -> dep_type -> {device_path}
 DEP_TYPE_USES = "uses"
 DEP_TYPE_USED_BY = "is used by"
 DEP_TYPE_CONSUMES = "consumes resources from"
 DEP_TYPE_PROVIDES = "provides resources to"
 
+
 def parse_eisa_id(eisa_id):
     chars = [
-        (eisa_id & 0x7c) >> 2,                                # Bit 6:2 of the first byte
-        ((eisa_id & 0x3) << 3) | ((eisa_id & 0xe000) >> 13),  # Bit 1:0 of the first byte and bit 7:5 of the second
-        (eisa_id & 0x1F00) >> 8,                              # Bit 4:0 of the second byte
-        (eisa_id & 0x00F00000) >> 20,                         # Bit 7:4 of the third byte
-        (eisa_id & 0x000F0000) >> 16,                         # Bit 3:0 of the third byte
-        (eisa_id & 0xF0000000) >> 28,                         # Bit 7:4 of the fourth byte
-        (eisa_id & 0x0F000000) >> 24,                         # Bit 3:0 of the fourth byte
+        (eisa_id & 0x7C) >> 2,  # Bit 6:2 of the first byte
+        ((eisa_id & 0x3) << 3)
+        | (
+            (eisa_id & 0xE000) >> 13
+        ),  # Bit 1:0 of the first byte and bit 7:5 of the second
+        (eisa_id & 0x1F00) >> 8,  # Bit 4:0 of the second byte
+        (eisa_id & 0x00F00000) >> 20,  # Bit 7:4 of the third byte
+        (eisa_id & 0x000F0000) >> 16,  # Bit 3:0 of the third byte
+        (eisa_id & 0xF0000000) >> 28,  # Bit 7:4 of the fourth byte
+        (eisa_id & 0x0F000000) >> 24,  # Bit 3:0 of the fourth byte
     ]
-    if all(map(lambda x:x <= (ord('Z') - 0x40), chars[:3])):
-        manufacturer = ''.join(map(lambda x: chr(x + 0x40), chars[:3]))
-        product = ''.join(map(lambda x: "%X" % x, chars[3:6]))
+    if all(map(lambda x: x <= (ord("Z") - 0x40), chars[:3])):
+        manufacturer = "".join(map(lambda x: chr(x + 0x40), chars[:3]))
+        product = "".join(map(lambda x: "%X" % x, chars[3:6]))
         revision = "%X" % chars[6]
         return manufacturer + product + revision
     else:
         return None
+
 
 predefined_nameseg = {
     "_SB_": ("bus", "system"),
@@ -57,12 +64,13 @@ buses = {
     "PNP0A08": "pci",
 }
 
+
 def get_device_element(devices_node, namepath, hid):
     assert namepath.startswith("\\")
     namesegs = namepath[1:].split(".")
 
     element = devices_node
-    for i,nameseg in enumerate(namesegs):
+    for i, nameseg in enumerate(namesegs):
         buspath = f"\\{'.'.join(namesegs[:(i+1)])}"
         tag, typ = "device", None
         if nameseg in predefined_nameseg.keys():
@@ -84,21 +92,47 @@ def get_device_element(devices_node, namepath, hid):
         element.set("id", hid)
     return element
 
+
 def parse_irq(idx, item, elem):
     irqs = ", ".join(map(str, item.irqs))
     add_child(elem, "resource", id=f"res{idx}", type="irq", int=irqs)
 
+
 def parse_io_port(idx, item, elem):
-    add_child(elem, "resource", id=f"res{idx}", type="io_port",
-              min=hex(item._MIN), max=hex(item._MAX), len=hex(item._LEN))
+    add_child(
+        elem,
+        "resource",
+        id=f"res{idx}",
+        type="io_port",
+        min=hex(item._MIN),
+        max=hex(item._MAX),
+        len=hex(item._LEN),
+    )
+
 
 def parse_fixed_io_port(idx, item, elem):
-    add_child(elem, "resource", id=f"res{idx}", type="io_port",
-              min=hex(item._BAS), max=hex(item._BAS + item._LEN - 1 if item._LEN else 0), len=hex(item._LEN))
+    add_child(
+        elem,
+        "resource",
+        id=f"res{idx}",
+        type="io_port",
+        min=hex(item._BAS),
+        max=hex(item._BAS + item._LEN - 1 if item._LEN else 0),
+        len=hex(item._LEN),
+    )
+
 
 def parse_fixed_memory_range(idx, item, elem):
-    add_child(elem, "resource", id=f"res{idx}", type="memory",
-              min=hex(item._BAS), max=hex(item._BAS + item._LEN - 1 if item._LEN else 0), len=hex(item._LEN))
+    add_child(
+        elem,
+        "resource",
+        id=f"res{idx}",
+        type="memory",
+        min=hex(item._BAS),
+        max=hex(item._BAS + item._LEN - 1 if item._LEN else 0),
+        len=hex(item._LEN),
+    )
+
 
 def parse_address_space_resource(idx, item, elem):
     if item._TYP == 0:
@@ -109,36 +143,56 @@ def parse_address_space_resource(idx, item, elem):
         typ = "bus_number"
     else:
         typ = "custom"
-    add_child(elem, "resource", id=f"res{idx}", type=typ, min=hex(item._MIN), max=hex(item._MIN + item._LEN - 1), len=hex(item._LEN))
+    add_child(
+        elem,
+        "resource",
+        id=f"res{idx}",
+        type=typ,
+        min=hex(item._MIN),
+        max=hex(item._MIN + item._LEN - 1),
+        len=hex(item._LEN),
+    )
+
 
 def parse_extended_irq(idx, item, elem):
     irqs = ", ".join(map(str, item._INT))
     add_child(elem, "resource", id=f"res{idx}", type="irq", int=irqs)
+
 
 def parse_tpm(elem):
     try:
         tpm2 = parse_tpm2()
 
         control_area = add_child(elem, "capability", None, id="control_area")
-        add_child(control_area, "address_of_control_area", hex(tpm2.address_of_control_area))
+        add_child(
+            control_area, "address_of_control_area", hex(
+                tpm2.address_of_control_area)
+        )
         start_method = add_child(elem, "capability", None, id="start_method")
         add_child(start_method, "value", hex(tpm2.start_method))
         for parameter in tpm2.start_method_specific_parameters:
             add_child(start_method, "parameter", hex(parameter))
         if hasattr(tpm2, "log_area_minimum_length"):
             log_area = add_child(elem, "capability", None, id="log_area")
-            add_child(log_area, "log_area_minimum_length", hex(tpm2.log_area_minimum_length))
-            add_child(log_area, "log_area_start_address", hex(tpm2.log_area_start_address))
+            add_child(
+                log_area, "log_area_minimum_length", hex(
+                    tpm2.log_area_minimum_length)
+            )
+            add_child(
+                log_area, "log_area_start_address", hex(
+                    tpm2.log_area_start_address)
+            )
     except Exception as e:
         logging.info(f"Parse ACPI TPM2 failed: {str(e)}")
         logging.info(f"Will not extract information from ACPI TPM2")
         return
 
+
 resource_parsers = {
     (0, SMALL_RESOURCE_ITEM_IRQ_FORMAT): parse_irq,
     (0, SMALL_RESOURCE_ITEM_IO_PORT): parse_io_port,
     (0, SMALL_RESOURCE_ITEM_FIXED_LOCATION_IO_PORT): parse_fixed_io_port,
-    (0, SMALL_RESOURCE_ITEM_END_TAG): (lambda x,y,z: None),
+    (0, SMALL_RESOURCE_ITEM_END_TAG): (lambda x, y, z: None),
     (1, LARGE_RESOURCE_ITEM_32BIT_FIXED_MEMORY_RANGE): parse_fixed_memory_range,
     (1, LARGE_RESOURCE_ITEM_ADDRESS_SPACE_RESOURCE): parse_address_space_resource,
     (1, LARGE_RESOURCE_ITEM_WORD_ADDRESS_SPACE): parse_address_space_resource,
@@ -146,6 +200,7 @@ resource_parsers = {
     (1, LARGE_RESOURCE_ITEM_QWORD_ADDRESS_SPACE): parse_address_space_resource,
     (1, LARGE_RESOURCE_ITEM_EXTENDED_ADDRESS_SPACE): parse_address_space_resource,
 }
+
 
 class CollectDependencyVisitor(Visitor):
     class AnalysisResult:
@@ -166,7 +221,11 @@ class CollectDependencyVisitor(Visitor):
                 self.all[scope_name].append(decl)
 
         def __str__(self):
-            formatter = lambda pair: "{}: {}".format(pair[0], list(map(lambda decl: decl.name, pair[1])))
+            def formatter(pair):
+                return "{}: {}".format(
+                    pair[0], list(map(lambda decl: decl.name, pair[1]))
+                )
+
             direct_deps = ", ".join(map(formatter, self.direct.items()))
             all_deps = ", ".join(map(formatter, self.all.items()))
             return f"direct deps = {{ {direct_deps} }}; all deps = {{ {all_deps} }}"
@@ -202,25 +261,42 @@ class CollectDependencyVisitor(Visitor):
             op_region_is_exposed = False
             op_region_type = op_region_decl.tree.RegionSpace.value
             if op_region_type == 0x00:  # System memory
-                self.interpreter.context.change_scope(op_region_decl.tree.scope)
-                region_base = self.interpreter.interpret(op_region_decl.tree.RegionOffset).get()
-                region_length = self.interpreter.interpret(op_region_decl.tree.RegionLen).get()
+                self.interpreter.context.change_scope(
+                    op_region_decl.tree.scope)
+                region_base = self.interpreter.interpret(
+                    op_region_decl.tree.RegionOffset
+                ).get()
+                region_length = self.interpreter.interpret(
+                    op_region_decl.tree.RegionLen
+                ).get()
                 self.interpreter.context.pop_scope()
 
                 device_decl = self.__find_device_of_object(op_region_decl)
                 if device_decl and self.context.has_symbol(f"{device_decl.name}._CRS"):
-                    crs_object = self.interpreter.interpret_method_call(f"{device_decl.name}._CRS")
+                    crs_object = self.interpreter.interpret_method_call(
+                        f"{device_decl.name}._CRS"
+                    )
                     resources = parse_resource_data(crs_object.get())
                     for item in filter(lambda x: x.type == 1, resources.items):
                         if item.name == LARGE_RESOURCE_ITEM_32BIT_FIXED_MEMORY_RANGE:
-                            if item._BAS <= region_base and region_base + region_length - 1 <= item._BAS + item._LEN - 1:
+                            if (
+                                item._BAS <= region_base
+                                and region_base + region_length - 1
+                                <= item._BAS + item._LEN - 1
+                            ):
                                 op_region_is_exposed = True
                                 break
-                        elif item.name in [LARGE_RESOURCE_ITEM_ADDRESS_SPACE_RESOURCE,
-                                           LARGE_RESOURCE_ITEM_WORD_ADDRESS_SPACE,
-                                           LARGE_RESOURCE_ITEM_QWORD_ADDRESS_SPACE,
-                                           LARGE_RESOURCE_ITEM_EXTENDED_ADDRESS_SPACE]:
-                            if item._MIN <= region_base and region_base + region_length - 1 <= item._MIN + item._LEN - 1:
+                        elif item.name in [
+                            LARGE_RESOURCE_ITEM_ADDRESS_SPACE_RESOURCE,
+                            LARGE_RESOURCE_ITEM_WORD_ADDRESS_SPACE,
+                            LARGE_RESOURCE_ITEM_QWORD_ADDRESS_SPACE,
+                            LARGE_RESOURCE_ITEM_EXTENDED_ADDRESS_SPACE,
+                        ]:
+                            if (
+                                item._MIN <= region_base
+                                and region_base + region_length - 1
+                                <= item._MIN + item._LEN - 1
+                            ):
                                 op_region_is_exposed = True
                                 break
             elif op_region_type == 0x02:  # PCI configuration space is always exposed
@@ -231,7 +307,9 @@ class CollectDependencyVisitor(Visitor):
 
     def is_exposed_field(self, field_decl):
         if isinstance(field_decl.region, str):
-            return self.__is_exposed_opregion(self.context.lookup_symbol(field_decl.region))
+            return self.__is_exposed_opregion(
+                self.context.lookup_symbol(field_decl.region)
+            )
         else:
             # Indexed fields are typically accessed using I/O ports which are not exposed to VMs in general.
             return False
@@ -239,7 +317,8 @@ class CollectDependencyVisitor(Visitor):
     def analyze(self, scope, obj_name):
         self.result = self.AnalysisResult()
 
-        self.tree_under_analysis = self.context.lookup_symbol(obj_name, scope).tree
+        self.tree_under_analysis = self.context.lookup_symbol(
+            obj_name, scope).tree
         self.to_visit = set([self.tree_under_analysis])
         self.current_tree = None
         visited = set()
@@ -256,7 +335,9 @@ class CollectDependencyVisitor(Visitor):
         scope_decl = decl
         try:
             while not isinstance(scope_decl, context.DeviceDecl):
-                scope_decl = self.context.lookup_symbol(self.context.parent(scope_decl.name))
+                scope_decl = self.context.lookup_symbol(
+                    self.context.parent(scope_decl.name)
+                )
         except UndefinedSymbol:
             scope_decl = None
         return scope_decl
@@ -265,7 +346,9 @@ class CollectDependencyVisitor(Visitor):
         scope_decl = decl
         try:
             while not isinstance(scope_decl, context.DeviceDecl):
-                scope_decl = self.context.lookup_symbol(self.context.parent(scope_decl.name))
+                scope_decl = self.context.lookup_symbol(
+                    self.context.parent(scope_decl.name)
+                )
                 if scope_decl.tree == self.current_tree:
                     # There is no need to record any dependency if ``decl`` is declared within the scope of the current
                     # visiting one (e.g. a local variable in a method).
@@ -284,7 +367,10 @@ class CollectDependencyVisitor(Visitor):
         try:
             decl = self.context.lookup_symbol(tree.value)
 
-            if isinstance(decl, context.OperationFieldDecl) and self.current_tree == self.tree_under_analysis:
+            if (
+                isinstance(decl, context.OperationFieldDecl)
+                and self.current_tree == self.tree_under_analysis
+            ):
                 if self.is_exposed_field(decl):
                     op_region_decl = self.context.lookup_symbol(decl.region)
                     self.__add_dependency(op_region_decl)
@@ -299,6 +385,7 @@ class CollectDependencyVisitor(Visitor):
             pass
 
         self.context.pop_scope()
+
 
 def add_object_to_device(interpreter, device_path, obj_name, result):
     def aux(device_path, obj_name, result):
@@ -331,18 +418,33 @@ def add_object_to_device(interpreter, device_path, obj_name, result):
                 # If the object refers to any operation region directly or indirectly, it is generally necessary to copy
                 # the original definition of the object.
                 for dev, decls in deps.all.items():
-                    if next(filter(lambda x: isinstance(x, context.OperationFieldDecl) and visitor.is_exposed_field(x), decls), None):
+                    if next(
+                        filter(
+                            lambda x: isinstance(x, context.OperationFieldDecl)
+                            and visitor.is_exposed_field(x),
+                            decls,
+                        ),
+                        None,
+                    ):
                         copy_object = True
                         break
 
-            evaluated = (result != None)
-            need_global = ("global" in deps.all.keys())
-            formatter = lambda x: '+' if x else '-'
-            logging.info(f"{device_path}.{obj_name}: Evaluated{formatter(evaluated)} Copy{formatter(copy_object)} NeedGlobal{formatter(need_global)}")
+            evaluated = result != None
+            need_global = "global" in deps.all.keys()
+
+            def formatter(x):
+                return "+" if x else "-"
+
+            logging.info(
+                f"{device_path}.{obj_name}: Evaluated{formatter(evaluated)} Copy{formatter(copy_object)} NeedGlobal{formatter(need_global)}"
+            )
             if result == None or copy_object:
                 if need_global:
-                    global_objs = ', '.join(map(lambda x: x.name, deps.all["global"]))
-                    raise NotImplementedError(f"{device_path}.{obj_name}: references to global objects: {global_objs}")
+                    global_objs = ", ".join(
+                        map(lambda x: x.name, deps.all["global"]))
+                    raise NotImplementedError(
+                        f"{device_path}.{obj_name}: references to global objects: {global_objs}"
+                    )
 
                 # Add directly referred objects first
                 for peer_device, peer_decls in deps.direct.items():
@@ -356,31 +458,50 @@ def add_object_to_device(interpreter, device_path, obj_name, result):
                         elif isinstance(peer_decl, context.OperationFieldDecl):
                             op_region_name = peer_decl.region
                             # Assume an operation region has at most one DefField object defining its fields
-                            device_objects[peer_device][f"{op_region_name}_fields"] = peer_decl.parent_tree
+                            device_objects[peer_device][
+                                f"{op_region_name}_fields"
+                            ] = peer_decl.parent_tree
                         else:
-                            if isinstance(peer_decl, context.MethodDecl) and peer_decl.nargs > 0:
-                                raise NotImplementedError(f"{peer_decl.name}: copy of methods with arguments is not supported")
-                            value = interpreter.interpret_method_call(peer_decl.name)
+                            if (
+                                isinstance(peer_decl, context.MethodDecl)
+                                and peer_decl.nargs > 0
+                            ):
+                                raise NotImplementedError(
+                                    f"{peer_decl.name}: copy of methods with arguments is not supported"
+                                )
+                            value = interpreter.interpret_method_call(
+                                peer_decl.name)
                             aux(peer_device, peer_obj_name, value)
 
                         # If decl is of another device, declare decl as an external symbol in the template of
                         # device_path so that the template can be parsed on its own
                         if peer_device != device_path:
-                            device_objects[device_path][peer_decl.name] = builder.DefExternal(
+                            device_objects[device_path][
+                                peer_decl.name
+                            ] = builder.DefExternal(
                                 peer_decl.name,
                                 peer_decl.object_type(),
-                                peer_decl.nargs if isinstance(peer_decl, context.MethodDecl) else 0)
-                            device_deps[device_path][DEP_TYPE_USES].add(peer_device)
-                            device_deps[peer_device][DEP_TYPE_USED_BY].add(device_path)
+                                peer_decl.nargs
+                                if isinstance(peer_decl, context.MethodDecl)
+                                else 0,
+                            )
+                            device_deps[device_path][DEP_TYPE_USES].add(
+                                peer_device)
+                            device_deps[peer_device][DEP_TYPE_USED_BY].add(
+                                device_path)
 
                 decl = interpreter.context.lookup_symbol(obj_name, device_path)
                 device_objects[device_path][obj_name] = decl.tree
             else:
                 tree = builder.build_value(result)
                 if tree:
-                    device_objects[device_path][obj_name] = builder.DefName(obj_name, tree)
+                    device_objects[device_path][obj_name] = builder.DefName(
+                        obj_name, tree
+                    )
                 else:
-                    raise NotImplementedError(f"{device_path}.{obj_name}: unrecognized type: {result.__class__.__name__}")
+                    raise NotImplementedError(
+                        f"{device_path}.{obj_name}: unrecognized type: {result.__class__.__name__}"
+                    )
 
     # The main routine that collects dependent objects recursively
     try:
@@ -396,13 +517,20 @@ def add_object_to_device(interpreter, device_path, obj_name, result):
                 if source:
                     source = source.decode("ascii")
                     try:
-                        peer_device = namespace.lookup_symbol(namespace.normalize_namepath(source), device_path).name
-                        device_deps[device_path][DEP_TYPE_CONSUMES].add(peer_device)
-                        device_deps[peer_device][DEP_TYPE_PROVIDES].add(device_path)
+                        peer_device = namespace.lookup_symbol(
+                            namespace.normalize_namepath(source), device_path
+                        ).name
+                        device_deps[device_path][DEP_TYPE_CONSUMES].add(
+                            peer_device)
+                        device_deps[peer_device][DEP_TYPE_PROVIDES].add(
+                            device_path)
                     except:
                         pass
     except NotImplementedError as e:
-        logging.info(f"{device_path}.{obj_name}: will not be added to vACPI, reason: {str(e)}")
+        logging.info(
+            f"{device_path}.{obj_name}: will not be added to vACPI, reason: {str(e)}"
+        )
+
 
 def fetch_device_info(devices_node, interpreter, namepath, args):
     logging.info(f"Fetch information about device object {namepath}")
@@ -491,9 +619,11 @@ def fetch_device_info(devices_node, interpreter, namepath, args):
             if isinstance(adr, int):
                 adr = hex(adr)
             if len(element.xpath(f"../*[@address='{adr}']")) > 0:
-                logging.info(f"{namepath} has siblings with duplicated address {adr}.")
+                logging.info(
+                    f"{namepath} has siblings with duplicated address {adr}.")
             else:
-                element.set("address", hex(adr) if isinstance(adr, int) else adr)
+                element.set("address", hex(adr)
+                            if isinstance(adr, int) else adr)
             add_object_to_device(interpreter, namepath, "_ADR", result)
 
         # Bus number that overrides _ADR when exists
@@ -526,7 +656,12 @@ def fetch_device_info(devices_node, interpreter, namepath, args):
                 if p in resource_parsers.keys():
                     resource_parsers[p](idx, item, element)
                 else:
-                    add_child(element, "resource", type=item.__class__.__name__, id=f"res{idx}")
+                    add_child(
+                        element,
+                        "resource",
+                        type=item.__class__.__name__,
+                        id=f"res{idx}",
+                    )
 
             add_object_to_device(interpreter, namepath, "_CRS", result)
 
@@ -537,16 +672,25 @@ def fetch_device_info(devices_node, interpreter, namepath, args):
             prt_info = defaultdict(lambda: {})
             for mapping in prt:
                 if isinstance(mapping.source, int):
-                    assert mapping.source == 0, "A _PRT mapping package should not contain a byte of non-zero as source"
+                    assert (
+                        mapping.source == 0
+                    ), "A _PRT mapping package should not contain a byte of non-zero as source"
                     prt_info[mapping.address][mapping.pin] = mapping.source_index
                 elif isinstance(mapping.source, context.DeviceDecl):
-                    prt_info[mapping.address][mapping.pin] = (mapping.source.name, mapping.source_index)
+                    prt_info[mapping.address][mapping.pin] = (
+                        mapping.source.name,
+                        mapping.source_index,
+                    )
                 else:
-                    logging.warning(f"The _PRT of {namepath} has a mapping with invalid source {mapping.source}")
+                    logging.warning(
+                        f"The _PRT of {namepath} has a mapping with invalid source {mapping.source}"
+                    )
 
             pin_routing_element = add_child(element, "interrupt_pin_routing")
             for address, pins in prt_info.items():
-                mapping_element = add_child(pin_routing_element, "routing", address=hex(address))
+                mapping_element = add_child(
+                    pin_routing_element, "routing", address=hex(address)
+                )
                 pin_names = {
                     0: "INTA#",
                     1: "INTB#",
@@ -555,12 +699,24 @@ def fetch_device_info(devices_node, interpreter, namepath, args):
                 }
                 for pin, info in pins.items():
                     if isinstance(info, int):
-                        add_child(mapping_element, "mapping", pin=pin_names[pin], source=str(info))
+                        add_child(
+                            mapping_element,
+                            "mapping",
+                            pin=pin_names[pin],
+                            source=str(info),
+                        )
                     else:
-                        add_child(mapping_element, "mapping", pin=pin_names[pin], source=info[0], index=str(info[1]))
+                        add_child(
+                            mapping_element,
+                            "mapping",
+                            pin=pin_names[pin],
+                            source=info[0],
+                            index=str(info[1]),
+                        )
 
     except FutureWork:
         pass
+
 
 def extract(args, board_etree):
     devices_node = get_node(board_etree, "//devices")
@@ -581,20 +737,21 @@ def extract(args, board_etree):
     except:
         logging.info(f"\\_PIC is not evaluated.")
 
-    for device in sorted(namespace.devices, key=lambda x:x.name):
+    for device in sorted(namespace.devices, key=lambda x: x.name):
         try:
             fetch_device_info(devices_node, interpreter, device.name, args)
         except Exception as e:
-            logging.info(f"Fetch information about device object {device.name} failed: {str(e)}")
+            logging.info(
+                f"Fetch information about device object {device.name} failed: {str(e)}"
+            )
 
     visitor = GenerateBinaryVisitor()
     for dev, objs in device_objects.items():
         element = get_node(devices_node, f"//device[acpi_object='{dev}']")
         if element is not None:
             tree = builder.DefDevice(
-                builder.PkgLength(),
-                dev,
-                builder.TermList(*list(objs.values())))
+                builder.PkgLength(), dev, builder.TermList(*list(objs.values()))
+            )
             add_child(element, "aml_template", visitor.generate(tree).hex())
 
     for dev, deps in device_deps.items():
@@ -604,5 +761,6 @@ def extract(args, board_etree):
                 for target in targets:
                     if dev != target:
                         add_child(element, "dependency", target, type=kind)
+
 
 advanced = True

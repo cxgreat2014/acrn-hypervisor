@@ -5,12 +5,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-import sys, os
+from importlib import import_module
+import common
+import sys
+import os
 import lxml.etree
 import argparse
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'library'))
-import common
-from importlib import import_module
+
+sys.path.append(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "library")
+)
+
 
 def main(args):
     # Initialize configuration libraries for backward compatibility
@@ -24,17 +29,26 @@ def main(args):
 
     board_etree = lxml.etree.parse(args.board)
     scenario_etree = lxml.etree.parse(args.scenario)
-    allocation_etree = lxml.etree.ElementTree(element=lxml.etree.fromstring("<acrn-config></acrn-config>"))
-    for script in [f for f in os.listdir(scripts_path) if f.endswith(".py") and f != current]:
+    allocation_etree = lxml.etree.ElementTree(
+        element=lxml.etree.fromstring("<acrn-config></acrn-config>")
+    )
+    for script in [
+        f for f in os.listdir(scripts_path) if f.endswith(".py") and f != current
+    ]:
         module_name = os.path.splitext(script)[0]
         module = import_module(f"{module_name}")
         module.fn(board_etree, scenario_etree, allocation_etree)
     allocation_etree.write(args.output, pretty_print=True)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--board", help="the XML file summarizing characteristics of the target board")
-    parser.add_argument("--scenario", help="the XML file specifying the scenario to be set up")
+    parser.add_argument(
+        "--board", help="the XML file summarizing characteristics of the target board"
+    )
+    parser.add_argument(
+        "--scenario", help="the XML file specifying the scenario to be set up"
+    )
     parser.add_argument("--output", help="location of the output XML")
     args = parser.parse_args()
 

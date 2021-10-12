@@ -7,7 +7,7 @@ import os
 import sys
 import shutil
 import argparse
-import subprocess # nosec
+import subprocess  # nosec
 import pci_dev
 import dmi
 import acpi
@@ -19,7 +19,7 @@ OUTPUT = "./out/"
 PY_CACHE = "__pycache__"
 
 # This file store information which query from hw board
-BIN_LIST = ['cpuid', 'rdmsr', 'lspci', ' dmidecode', 'blkid', 'stty']
+BIN_LIST = ["cpuid", "rdmsr", "lspci", " dmidecode", "blkid", "stty"]
 
 CPU_VENDOR = "GenuineIntel"
 
@@ -27,17 +27,19 @@ CPU_VENDOR = "GenuineIntel"
 def check_permission():
     """Check if it is root permission"""
     if os.getuid():
-        parser_lib.print_red("You need run this tool with root privileges (sudo)!")
+        parser_lib.print_red(
+            "You need run this tool with root privileges (sudo)!")
         sys.exit(1)
+
 
 def vendor_check():
     """Check the CPU vendor"""
-    with open("/proc/cpuinfo", 'r') as f_node:
+    with open("/proc/cpuinfo", "r") as f_node:
         while True:
             line = f_node.readline()
-            if len(line.split(':')) == 2:
-                if line.split(':')[0].strip() == "vendor_id":
-                    vendor_name = line.split(':')[1].strip()
+            if len(line.split(":")) == 2:
+                if line.split(":")[0].strip() == "vendor_id":
+                    vendor_name = line.split(":")[1].strip()
                     return vendor_name == CPU_VENDOR
 
 
@@ -53,20 +55,29 @@ def check_env():
 
     # check if required tools are exists
     for excute in BIN_LIST:
-        res = subprocess.Popen("which {}".format(excute),
-                               shell=True, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, close_fds=True)
+        res = subprocess.Popen(
+            "which {}".format(excute),
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            close_fds=True,
+        )
 
-        line = res.stdout.readline().decode('ascii')
+        line = res.stdout.readline().decode("ascii")
         if not line:
-            parser_lib.print_yel("'{}' not found, please install it!".format(excute))
+            parser_lib.print_yel(
+                "'{}' not found, please install it!".format(excute))
             sys.exit(1)
 
-        if excute == 'cpuid':
-            res = subprocess.Popen("cpuid -v",
-                                   shell=True, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE, close_fds=True)
-            line = res.stdout.readline().decode('ascii')
+        if excute == "cpuid":
+            res = subprocess.Popen(
+                "cpuid -v",
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                close_fds=True,
+            )
+            line = res.stdout.readline().decode("ascii")
             version = line.split()[2]
             if int(version) < 20170122:
                 parser_lib.print_yel("Need CPUID version >= 20170122")
@@ -76,15 +87,19 @@ def check_env():
         shutil.rmtree(OUTPUT)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     check_permission()
 
     check_env()
 
     # arguments to parse
-    PARSER = argparse.ArgumentParser(usage='%(prog)s <board_name> [--out board_info_file]')
-    PARSER.add_argument('board_name', help=":  the name of the board that runs the ACRN hypervisor")
-    PARSER.add_argument('--out', help=":  the name of board info file.")
+    PARSER = argparse.ArgumentParser(
+        usage="%(prog)s <board_name> [--out board_info_file]"
+    )
+    PARSER.add_argument(
+        "board_name", help=":  the name of the board that runs the ACRN hypervisor"
+    )
+    PARSER.add_argument("--out", help=":  the name of board info file.")
     ARGS = PARSER.parse_args()
 
     if not ARGS.out:
@@ -93,7 +108,7 @@ if __name__ == '__main__':
     else:
         BOARD_INFO = ARGS.out
 
-    with open(BOARD_INFO, 'w+') as f:
+    with open(BOARD_INFO, "w+") as f:
         print('<acrn-config board="{}">'.format(ARGS.board_name), file=f)
 
     # Get bios and base board info and store to board info
@@ -111,5 +126,5 @@ if __name__ == '__main__':
     # Generate misc info
     misc.generate_info(BOARD_INFO)
 
-    with open(BOARD_INFO, 'a+') as f:
+    with open(BOARD_INFO, "a+") as f:
         print("</acrn-config>", file=f)

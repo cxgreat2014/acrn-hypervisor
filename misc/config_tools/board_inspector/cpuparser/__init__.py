@@ -31,6 +31,7 @@ dispatch_table = {
     0x80000008: cpuparser.cpuids.LEAF_80000008,
 }
 
+
 def parse_cpuid(leaf, subleaf, cpu_id):
     if leaf in dispatch_table.keys():
         return dispatch_table[leaf].read(cpu_id, subleaf)
@@ -59,6 +60,7 @@ def parse_cpuid(leaf, subleaf, cpu_id):
             return None
     else:
         return None
+
 
 def get_online_cpu_ids():
     acc = list()

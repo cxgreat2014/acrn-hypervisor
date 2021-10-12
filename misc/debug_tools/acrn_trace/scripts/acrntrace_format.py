@@ -9,9 +9,9 @@ import signal
 import struct
 import getopt
 
+
 def usage():
-    print >> sys.stderr, \
-          """
+    print >>sys.stderr, """
     Usage:
           acrntrace_format.py [options] [formats] [trace_data]
 
@@ -35,28 +35,32 @@ def usage():
           There can be only one such rule for each type of event.
           """
 
+
 def read_format(format_file):
     formats = {}
 
     fd = open(format_file)
 
-    reg = re.compile('(\S+)\s+(\S.*)')
+    reg = re.compile("(\S+)\s+(\S.*)")
 
     while True:
         line = fd.readline()
         if not line:
             break
 
-        if line[0] == '#' or line[0] == '\n':
+        if line[0] == "#" or line[0] == "\n":
             continue
 
         m = reg.match(line)
 
-        if not m: print >> sys.stderr, "Wrong format file"; sys.exit(1)
+        if not m:
+            print >>sys.stderr, "Wrong format file"
+            sys.exit(1)
 
         formats[str(eval(m.group(1)))] = m.group(2)
 
     return formats
+
 
 exit = 0
 
@@ -68,15 +72,15 @@ exit = 0
 # cpu means cpu id this trace entry belong to
 TSCREC = "Q"
 HDRREC = "Q"
-D2REC  = "QQ"
+D2REC = "QQ"
 D4REC = "IIII"
 D8REC = "BBBBBBBBBBBBBBBB"
 D16REC = "bbbbbbbbbbbbbbbb"
 
+
 def main_loop(formats, fd):
     global exit
     i = 0
-
 
     while not exit:
         try:
@@ -91,9 +95,9 @@ def main_loop(formats, fd):
             if not line:
                 break
             event = struct.unpack(HDRREC, line)[0]
-            n_data = event >> 48 & 0xff
+            n_data = event >> 48 & 0xFF
             cpu = event >> 56
-            event = event & 0xffffffffffff
+            event = event & 0xFFFFFFFFFFFF
 
             d1 = 0
             d2 = 0
@@ -130,54 +134,89 @@ def main_loop(formats, fd):
                     break
                 # TRACE_6C using the first 6 data of fields_8. Actaully we have
                 # 16 data in every trace entry.
-                (d1, d2, d3, d4, d5, d6, d7, d8,
-                 d9, d10, d11, d12, d13, d14, d15, d16) = struct.unpack(D8REC, line)
+                (
+                    d1,
+                    d2,
+                    d3,
+                    d4,
+                    d5,
+                    d6,
+                    d7,
+                    d8,
+                    d9,
+                    d10,
+                    d11,
+                    d12,
+                    d13,
+                    d14,
+                    d15,
+                    d16,
+                ) = struct.unpack(D8REC, line)
 
             if n_data == 16:
                 line = fd.read(struct.calcsize(D16REC))
                 if not line:
                     break
 
-                (d1, d2, d3, d4, d5, d6, d7, d8,
-                 d9, d10, d11, d12, d13, d14, d15, d16) = struct.unpack(D16REC, line)
+                (
+                    d1,
+                    d2,
+                    d3,
+                    d4,
+                    d5,
+                    d6,
+                    d7,
+                    d8,
+                    d9,
+                    d10,
+                    d11,
+                    d12,
+                    d13,
+                    d14,
+                    d15,
+                    d16,
+                ) = struct.unpack(D16REC, line)
 
-            args = {'cpu'   : cpu,
-                    'tsc'   : tsc,
-                    'event' : event,
-                    '1'     : d1,
-                    '2'     : d2,
-                    '3'     : d3,
-                    '4'     : d4,
-                    '5'     : d5,
-                    '6'     : d6,
-                    '7'     : d7,
-                    '8'     : d8,
-                    '9'     : d9,
-                    '10'    : d10,
-                    '11'    : d11,
-                    '12'    : d12,
-                    '13'    : d13,
-                    '14'    : d14,
-                    '15'    : d15,
-                    '16'    : d16      }
+            args = {
+                "cpu": cpu,
+                "tsc": tsc,
+                "event": event,
+                "1": d1,
+                "2": d2,
+                "3": d3,
+                "4": d4,
+                "5": d5,
+                "6": d6,
+                "7": d7,
+                "8": d8,
+                "9": d9,
+                "10": d10,
+                "11": d11,
+                "12": d12,
+                "13": d13,
+                "14": d14,
+                "15": d15,
+                "16": d16,
+            }
 
             try:
                 if str(event) in formats.keys():
-                    print (formats[str(event)] % args)
+                    print(formats[str(event)] % args)
             except TypeError:
                 if str(event) in formats.key():
-                    print (formats[str(event)])
-                    print (args)
+                    print(formats[str(event)])
+                    print(args)
 
         except struct.error:
             sys.exit()
+
 
 def main(argv):
     try:
         opts, arg = getopt.getopt(sys.argv[1:], "h")
 
         for opt in opts:
-            if opt[0] == '-h':
+            if opt[0] == "-h":
                 usage()
                 sys.exit()
 
@@ -187,11 +226,12 @@ def main(argv):
 
     try:
         formats = read_format(arg[0])
-        fd = open(arg[1], 'rb')
+        fd = open(arg[1], "rb")
     except IOError:
         sys.exit(1)
 
     main_loop(formats, fd)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])

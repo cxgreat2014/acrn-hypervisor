@@ -18,10 +18,11 @@ import shutil
 import sys
 
 # directives to parse for included files
-DIRECTIVES = ["figure","include","image","literalinclude", "graphviz"]
+DIRECTIVES = ["figure", "include", "image", "literalinclude", "graphviz"]
 
 ZEPHYR_BASE = "../"
 ZEPHYR_BUILD = None
+
 
 def copy_if_different(src, dst):
     # Copies 'src' as 'dst', but only if dst does not exist or if itx contents
@@ -31,19 +32,20 @@ def copy_if_different(src, dst):
         return
     shutil.copyfile(src, dst)
 
+
 def get_files(all, dest, dir):
     matches = []
-    for root, dirnames, filenames in os.walk('%s/%s' %(ZEPHYR_BASE, dir)):
+    for root, dirnames, filenames in os.walk("%s/%s" % (ZEPHYR_BASE, dir)):
         if ZEPHYR_BUILD:
             if os.path.normpath(root).startswith(os.path.normpath(ZEPHYR_BUILD)):
                 # Build folder, skip it
                 continue
 
-        for filename in fnmatch.filter(filenames, '*' if all else '*.rst'):
+        for filename in fnmatch.filter(filenames, "*" if all else "*.rst"):
             matches.append(os.path.join(root, filename))
     for file in matches:
-        frel = file.replace(ZEPHYR_BASE,"").strip("/")
-        dir=os.path.dirname(frel)
+        frel = file.replace(ZEPHYR_BASE, "").strip("/")
+        dir = os.path.dirname(frel)
         if not os.path.exists(os.path.join(dest, dir)):
             os.makedirs(os.path.join(dest, dir))
 
@@ -60,7 +62,7 @@ def get_files(all, dest, dir):
 
             content = [x.strip() for x in content]
             directives = "|".join(DIRECTIVES)
-            pattern = re.compile("\s*\.\.\s+(%s)::\s+(.*)" %directives)
+            pattern = re.compile("\s*\.\.\s+(%s)::\s+(.*)" % directives)
             for l in content:
                 m = pattern.match(l)
                 if m:
@@ -75,7 +77,10 @@ def get_files(all, dest, dir):
                         copy_if_different(src, dst)
 
                     except FileNotFoundError:
-                        sys.stderr.write("File not found: %s\n  reference by %s\n" % (inf, file))
+                        sys.stderr.write(
+                            "File not found: %s\n  reference by %s\n" % (
+                                inf, file)
+                        )
 
         except UnicodeDecodeError as e:
             sys.stderr.write(
@@ -83,31 +88,42 @@ def get_files(all, dest, dir):
                 "  Context: {}\n"
                 "  Problematic data: {}\n"
                 "  Reason: {}\n".format(
-                    e.encoding, file,
-                    e.object[max(e.start - 40, 0):e.end + 40],
-                    e.object[e.start:e.end],
-                    e.reason))
+                    e.encoding,
+                    file,
+                    e.object[max(e.start - 40, 0): e.end + 40],
+                    e.object[e.start: e.end],
+                    e.reason,
+                )
+            )
 
         f.close()
 
+
 def main():
 
-    parser = argparse.ArgumentParser(description='Recursively copy .rst files '
-                                     'from the origin folder(s) to the '
-                                     'destination folder, plus files referenced '
-                                     'in those .rst files by a configurable '
-                                     'list of directives: {}.'.format(DIRECTIVES))
+    parser = argparse.ArgumentParser(
+        description="Recursively copy .rst files "
+        "from the origin folder(s) to the "
+        "destination folder, plus files referenced "
+        "in those .rst files by a configurable "
+        "list of directives: {}.".format(DIRECTIVES)
+    )
 
-    parser.add_argument('-a', '--all', action='store_true', help='Copy all files '
-                        '(recursively) in the specified source folder(s).')
-    parser.add_argument('dest', nargs=1)
-    parser.add_argument('src', nargs='+')
+    parser.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="Copy all files " "(recursively) in the specified source folder(s).",
+    )
+    parser.add_argument("dest", nargs=1)
+    parser.add_argument("src", nargs="+")
     args = parser.parse_args()
 
     dest = args.dest[0]
 
     for d in args.src:
         get_files(args.all, dest, d)
+
 
 if __name__ == "__main__":
     main()

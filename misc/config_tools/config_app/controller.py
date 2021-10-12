@@ -7,12 +7,20 @@
 
 import os
 from xmlschema import XMLSchema11
-from xmlschema.validators import Xsd11Element, XsdSimpleType, XsdAtomicBuiltin, Xsd11ComplexType, Xsd11Group, Xsd11Attribute
+from xmlschema.validators import (
+    Xsd11Element,
+    XsdSimpleType,
+    XsdAtomicBuiltin,
+    Xsd11ComplexType,
+    Xsd11Group,
+    Xsd11Attribute,
+)
 import lxml.etree as etree
 
 
 class XmlConfig:
     """The core class to analyze and modify acrn config xml files"""
+
     def __init__(self, path=None, default=True):
         self._xml_path = path
         self._default = default
@@ -27,29 +35,29 @@ class XmlConfig:
         :return: the xml type.
         :raises: ValueError, OSError, SyntaxError.
         """
-        xml_type = ''
-        if os.path.splitext(xml_file)[1] != '.xml':
+        xml_type = ""
+        if os.path.splitext(xml_file)[1] != ".xml":
             return xml_type
         try:
             tree = etree.parse(xml_file)
             root = tree.getroot()
-            if 'uos_launcher' in root.attrib:
-                xml_type = 'uos_launcher'
-            elif 'scenario' in root.attrib:
-                xml_type = 'scenario'
-            elif 'board' in root.attrib:
-                xml_type = 'board'
-            elif 'board_setting' in root.attrib:
-                xml_type = 'board_setting'
+            if "uos_launcher" in root.attrib:
+                xml_type = "uos_launcher"
+            elif "scenario" in root.attrib:
+                xml_type = "scenario"
+            elif "board" in root.attrib:
+                xml_type = "board"
+            elif "board_setting" in root.attrib:
+                xml_type = "board_setting"
         except ValueError:
-            print('xml parse error: {}'.format(xml_file))
-            xml_type = ''
+            print("xml parse error: {}".format(xml_file))
+            xml_type = ""
         except OSError:
-            print('xml open error: {}'.format(xml_file))
-            xml_type = ''
+            print("xml open error: {}".format(xml_file))
+            xml_type = ""
         except SyntaxError:
-            print('xml syntax error: {}'.format(xml_file))
-            xml_type = ''
+            print("xml syntax error: {}".format(xml_file))
+            xml_type = ""
 
         return xml_type
 
@@ -69,7 +77,7 @@ class XmlConfig:
             if os.path.isfile(test_file_path):
                 if XmlConfig._get_xml_type(test_file_path) == xml_type:
                     xmls.append(os.path.splitext(test_file)[0])
-        user_path = os.path.join(self._xml_path, 'user_defined')
+        user_path = os.path.join(self._xml_path, "user_defined")
         if os.path.isdir(user_path):
             for test_file in os.listdir(user_path):
                 test_file_path = os.path.join(user_path, test_file)
@@ -91,23 +99,27 @@ class XmlConfig:
         try:
             self._curr_xml = xml
 
-            xml_path = os.path.join(self._xml_path, self._curr_xml + '.xml') \
-                if self._default \
-                else os.path.join(self._xml_path, 'user_defined', self._curr_xml + '.xml')
+            xml_path = (
+                os.path.join(self._xml_path, self._curr_xml + ".xml")
+                if self._default
+                else os.path.join(
+                    self._xml_path, "user_defined", self._curr_xml + ".xml"
+                )
+            )
 
             parser = etree.XMLParser(remove_blank_text=True)
             tree = etree.parse(xml_path, parser)
             self._curr_xml_tree = tree
         except ValueError:
-            print('xml parse error: {}'.format(xml))
+            print("xml parse error: {}".format(xml))
             self._curr_xml = None
             self._curr_xml_tree = None
         except OSError:
-            print('xml open error: {}'.format(xml))
+            print("xml open error: {}".format(xml))
             self._curr_xml = None
             self._curr_xml_tree = None
         except SyntaxError:
-            print('xml syntax error: {}'.format(xml))
+            print("xml syntax error: {}".format(xml))
             self._curr_xml = None
             self._curr_xml_tree = None
 
@@ -138,8 +150,8 @@ class XmlConfig:
         dest_node = self._get_dest_node(*args)
         if dest_node is None:
             return None
-        if dest_node.text is None or dest_node.text.strip() == '':
-            return ''
+        if dest_node.text is None or dest_node.text.strip() == "":
+            return ""
         return dest_node.text
 
     def set_curr_value(self, value, *args):
@@ -169,14 +181,14 @@ class XmlConfig:
         new_node_desc = None
         for node in list(dest_node):
             if node.tag == tag:
-                if 'desc' in node.attrib:
-                    new_node_desc = node.attrib['desc']
+                if "desc" in node.attrib:
+                    new_node_desc = node.attrib["desc"]
                 dest_node.remove(node)
         for value in values:
             new_node = etree.SubElement(dest_node, tag)
             new_node.text = value
             if new_node_desc is not None:
-                new_node.attrib['desc'] = new_node_desc
+                new_node.attrib["desc"] = new_node_desc
 
     def set_curr_attr(self, attr_name, attr_value, *args):
         """
@@ -205,10 +217,11 @@ class XmlConfig:
 
         dest_node = self._get_dest_node(*args)
 
-        if key in ['vm']:
-            etree.SubElement(dest_node, key, attrib={'id': value, 'desc': desc})
+        if key in ["vm"]:
+            etree.SubElement(dest_node, key, attrib={
+                             "id": value, "desc": desc})
         else:
-            new_node = etree.SubElement(dest_node, key, attrib={'desc': desc})
+            new_node = etree.SubElement(dest_node, key, attrib={"desc": desc})
             new_node.text = value
 
     def get_curr_elem(self, *args):
@@ -282,7 +295,7 @@ class XmlConfig:
         if self._curr_xml_tree is None:
             return None
         dest_node = self._curr_xml_tree.getroot()
-        path = '.'
+        path = "."
         for arg in args:
             # tag:attr=xxx
             # tag:attr
@@ -290,28 +303,28 @@ class XmlConfig:
             tag = None
             attr_name = None
             attr_value = None
-            if ':' not in arg:
+            if ":" not in arg:
                 tag = arg
-            elif '=' not in arg:
+            elif "=" not in arg:
                 # tag = arg.split(':')[0]
                 # attr_name = arg.split(':')[1]
-                raise Exception('unsupported xml path: tag:attr')
+                raise Exception("unsupported xml path: tag:attr")
             else:
-                tag = arg.split(':')[0]
-                attr = arg.split(':')[1]
-                attr_name = attr.split('=')[0]
-                attr_value = attr.split('=')[1]
+                tag = arg.split(":")[0]
+                attr = arg.split(":")[1]
+                attr_name = attr.split("=")[0]
+                attr_value = attr.split("=")[1]
 
             if attr_value is None:
-                path += ("/" + tag)
+                path += "/" + tag
             else:
-                path += ("/" + tag + "[@" + attr_name + "='" + attr_value + "']")
+                path += "/" + tag + "[@" + attr_name + "='" + attr_value + "']"
 
         dest_node = dest_node.findall(path)
         if dest_node is not None and dest_node != []:
             return dest_node[0]
 
-        raise Exception('can not find node by {} from xml'.format(args))
+        raise Exception("can not find node by {} from xml".format(args))
 
     def save(self, xml=None, user_defined=False):
         """
@@ -327,11 +340,13 @@ class XmlConfig:
 
         xml_path = self._xml_path
         if user_defined:
-            xml_path = os.path.join(self._xml_path, 'user_defined')
+            xml_path = os.path.join(self._xml_path, "user_defined")
         if not os.path.isdir(xml_path):
             os.makedirs(xml_path)
 
-        self._curr_xml_tree.write(os.path.join(xml_path, xml+'.xml'), encoding='utf-8', pretty_print=True)
+        self._curr_xml_tree.write(
+            os.path.join(xml_path, xml + ".xml"), encoding="utf-8", pretty_print=True
+        )
 
     def _format_xml(self, element, depth=0):
         i = "\n" + depth * "    "
@@ -373,7 +388,7 @@ def get_acrn_config_element(xsd_file):
     return acrn_config_element_root
 
 
-def xsd_2_acrn_config_element(xsd_element, layer=0, index=0, path=''):
+def xsd_2_acrn_config_element(xsd_element, layer=0, index=0, path=""):
     """
     translate XSD element to ACRN config element
     :param xsd_element: the xsd element
@@ -383,70 +398,83 @@ def xsd_2_acrn_config_element(xsd_element, layer=0, index=0, path=''):
     :return: ACRN config element
     """
     acrn_config_element = {
-        'name': xsd_element.name,
-        'type': None,
-        'path': path+'/'+xsd_element.name,
-        'layer': layer,
-        'index': index,
-        'doc': None,
-        'configurable': 'y',
-        'readonly': 'n',
-        'multiselect': 'n',
-        'default': xsd_element.default,
-        'attributes': None,
+        "name": xsd_element.name,
+        "type": None,
+        "path": path + "/" + xsd_element.name,
+        "layer": layer,
+        "index": index,
+        "doc": None,
+        "configurable": "y",
+        "readonly": "n",
+        "multiselect": "n",
+        "default": xsd_element.default,
+        "attributes": None,
         # 'minOccurs': None,
         # 'maxOccurs': None,
-        'enumeration': None,
-        'sub_elements': None
+        "enumeration": None,
+        "sub_elements": None,
     }
     if isinstance(xsd_element.type, Xsd11ComplexType):
-        acrn_config_element['type'] = xsd_element.type.name
+        acrn_config_element["type"] = xsd_element.type.name
         for xsd_component in xsd_element.type.iter_components():
             if isinstance(xsd_component, Xsd11Group):
-                if acrn_config_element['sub_elements'] is None:
-                    acrn_config_element['sub_elements'] = {'all':[], 'choice':[], 'sequence':[]}
+                if acrn_config_element["sub_elements"] is None:
+                    acrn_config_element["sub_elements"] = {
+                        "all": [],
+                        "choice": [],
+                        "sequence": [],
+                    }
                 index = 0
                 for sub_xsd_component in xsd_component.iter_components():
                     if isinstance(sub_xsd_component, Xsd11Element):
-                        sub_acrn_config_element = xsd_2_acrn_config_element(sub_xsd_component, layer+1,
-                                                                            index, path+'/'+xsd_element.name)
-                        acrn_config_element['sub_elements'][xsd_component.model].append(sub_acrn_config_element)
+                        sub_acrn_config_element = xsd_2_acrn_config_element(
+                            sub_xsd_component,
+                            layer + 1,
+                            index,
+                            path + "/" + xsd_element.name,
+                        )
+                        acrn_config_element["sub_elements"][xsd_component.model].append(
+                            sub_acrn_config_element
+                        )
                         index += 1
     else:
         if isinstance(xsd_element.type, XsdAtomicBuiltin):
-            acrn_config_element['type'] = xsd_element.type.name
+            acrn_config_element["type"] = xsd_element.type.name
         elif isinstance(xsd_element.type.base_type, XsdSimpleType):
-            acrn_config_element['type'] = xsd_element.type.base_type.name
+            acrn_config_element["type"] = xsd_element.type.base_type.name
         else:
-            acrn_config_element['type'] = xsd_element.type.name
+            acrn_config_element["type"] = xsd_element.type.name
         if xsd_element.type.enumeration:
-            acrn_config_element['enumeration'] = xsd_element.type.enumeration
+            acrn_config_element["enumeration"] = xsd_element.type.enumeration
 
     annotation = None
-    if hasattr(xsd_element, 'annotation') and xsd_element.annotation:
+    if hasattr(xsd_element, "annotation") and xsd_element.annotation:
         annotation = xsd_element.annotation
-    elif hasattr(xsd_element.type, 'annotation') and xsd_element.type.annotation:
+    elif hasattr(xsd_element.type, "annotation") and xsd_element.type.annotation:
         annotation = xsd_element.type.annotation
     if annotation:
         if annotation.documentation:
-            doc_list = [documentation.text for documentation in annotation.documentation]
-            acrn_config_element['doc'] = '\n'.join(doc_list)
+            doc_list = [
+                documentation.text for documentation in annotation.documentation
+            ]
+            acrn_config_element["doc"] = "\n".join(doc_list)
         for key in annotation.elem.keys():
-            if key.endswith('configurable'):
-                acrn_config_element['configurable'] = annotation.elem.get(key)
-            elif key.endswith('readonly'):
-                acrn_config_element['readonly'] = annotation.elem.get(key)
-            elif key.endswith('multiselect'):
-                acrn_config_element['multiselect'] = annotation.elem.get(key)
+            if key.endswith("configurable"):
+                acrn_config_element["configurable"] = annotation.elem.get(key)
+            elif key.endswith("readonly"):
+                acrn_config_element["readonly"] = annotation.elem.get(key)
+            elif key.endswith("multiselect"):
+                acrn_config_element["multiselect"] = annotation.elem.get(key)
 
     if xsd_element.attributes:
         attrs = []
         for attr in xsd_element.attributes.iter_components():
             if isinstance(attr, Xsd11Attribute):
-                attrs.append({'name': attr.name, 'type': attr.type.name})
-        acrn_config_element['attributes'] = attrs
+                attrs.append({"name": attr.name, "type": attr.type.name})
+        acrn_config_element["attributes"] = attrs
 
     return acrn_config_element
+
 
 def acrn_config_element_2_doc_dict(acrn_config_element, doc_dict):
     """
@@ -455,18 +483,22 @@ def acrn_config_element_2_doc_dict(acrn_config_element, doc_dict):
     :param doc_dict: the dictionary to save documentation of all configurable elements
     :return: the dictionary to save documentation of all configurable elements
     """
-    if 'doc' in acrn_config_element and 'path' in acrn_config_element \
-        and acrn_config_element['path'] not in doc_dict:
-        if acrn_config_element['doc']:
-            doc_dict[acrn_config_element['path']] = acrn_config_element['doc']
+    if (
+        "doc" in acrn_config_element
+        and "path" in acrn_config_element
+        and acrn_config_element["path"] not in doc_dict
+    ):
+        if acrn_config_element["doc"]:
+            doc_dict[acrn_config_element["path"]] = acrn_config_element["doc"]
         else:
-            doc_dict[acrn_config_element['path']] = acrn_config_element['name']
+            doc_dict[acrn_config_element["path"]] = acrn_config_element["name"]
 
-    if 'sub_elements' in acrn_config_element and acrn_config_element['sub_elements']:
-        for order_type in acrn_config_element['sub_elements']:
-            for element in acrn_config_element['sub_elements'][order_type]:
+    if "sub_elements" in acrn_config_element and acrn_config_element["sub_elements"]:
+        for order_type in acrn_config_element["sub_elements"]:
+            for element in acrn_config_element["sub_elements"][order_type]:
                 doc_dict = acrn_config_element_2_doc_dict(element, doc_dict)
     return doc_dict
+
 
 def acrn_config_element_2_enum_dict(acrn_config_element, enum_dict):
     """
@@ -475,15 +507,20 @@ def acrn_config_element_2_enum_dict(acrn_config_element, enum_dict):
     :param enum_dict: the dictionary to save enumeration of all configurable elements
     :return: the dictionary to save enumeration of all configurable elements
     """
-    if 'enumeration' in acrn_config_element and 'path' in acrn_config_element \
-        and acrn_config_element['path'] not in enum_dict \
-        and acrn_config_element['enumeration']:
-        enum_dict[acrn_config_element['path']] = acrn_config_element['enumeration']
-    if 'sub_elements' in acrn_config_element and acrn_config_element['sub_elements']:
-        for order_type in acrn_config_element['sub_elements']:
-            for element in acrn_config_element['sub_elements'][order_type]:
+    if (
+        "enumeration" in acrn_config_element
+        and "path" in acrn_config_element
+        and acrn_config_element["path"] not in enum_dict
+        and acrn_config_element["enumeration"]
+    ):
+        enum_dict[acrn_config_element["path"]
+                  ] = acrn_config_element["enumeration"]
+    if "sub_elements" in acrn_config_element and acrn_config_element["sub_elements"]:
+        for order_type in acrn_config_element["sub_elements"]:
+            for element in acrn_config_element["sub_elements"][order_type]:
                 enum_dict = acrn_config_element_2_enum_dict(element, enum_dict)
     return enum_dict
+
 
 def acrn_config_element_2_xpath_dict(acrn_config_element, xpath_dict):
     """
@@ -492,24 +529,27 @@ def acrn_config_element_2_xpath_dict(acrn_config_element, xpath_dict):
     :param xpath_dict: the dictionary to save xpath of all configurable elements
     :return: the dictionary to save xpath of all configurable elements
     """
-    if acrn_config_element['path'] not in xpath_dict.keys():
-        xpath_dict[acrn_config_element['path']] = {
-            'name': acrn_config_element['name'],
-            'type': acrn_config_element['type'],
-            'layer': acrn_config_element['layer'],
-            'index': acrn_config_element['index'],
-            'doc': acrn_config_element['doc'] if acrn_config_element['doc'] else acrn_config_element['name'],
-            'configurable': acrn_config_element['configurable'],
-            'readonly': acrn_config_element['readonly'],
-            'multiselect': acrn_config_element['multiselect'],
-            'default': acrn_config_element['default'],
-            'attributes': acrn_config_element['attributes'],
+    if acrn_config_element["path"] not in xpath_dict.keys():
+        xpath_dict[acrn_config_element["path"]] = {
+            "name": acrn_config_element["name"],
+            "type": acrn_config_element["type"],
+            "layer": acrn_config_element["layer"],
+            "index": acrn_config_element["index"],
+            "doc": acrn_config_element["doc"]
+            if acrn_config_element["doc"]
+            else acrn_config_element["name"],
+            "configurable": acrn_config_element["configurable"],
+            "readonly": acrn_config_element["readonly"],
+            "multiselect": acrn_config_element["multiselect"],
+            "default": acrn_config_element["default"],
+            "attributes": acrn_config_element["attributes"],
             # 'minOccurs': None,
             # 'maxOccurs': None,
-            'enumeration': acrn_config_element['enumeration']
+            "enumeration": acrn_config_element["enumeration"],
         }
-    if 'sub_elements' in acrn_config_element and acrn_config_element['sub_elements']:
-        for order_type in acrn_config_element['sub_elements']:
-            for element in acrn_config_element['sub_elements'][order_type]:
-                enum_dict = acrn_config_element_2_xpath_dict(element, xpath_dict)
+    if "sub_elements" in acrn_config_element and acrn_config_element["sub_elements"]:
+        for order_type in acrn_config_element["sub_elements"]:
+            for element in acrn_config_element["sub_elements"][order_type]:
+                enum_dict = acrn_config_element_2_xpath_dict(
+                    element, xpath_dict)
     return xpath_dict

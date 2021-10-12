@@ -15,6 +15,7 @@ PCI_IDS_PATHS = [
     "/usr/share/pci.ids.gz",
 ]
 
+
 class PCI_IDs:
     def __init__(self, f):
         names = {}
@@ -34,7 +35,9 @@ class PCI_IDs:
             if line.startswith("\t\t"):
                 if device_id is not None:
                     parts = line.strip().split("  ")
-                    subvendor_id, subdevice_id = tuple(map(lambda x: int(x, base=16), parts[0].split(" ")))
+                    subvendor_id, subdevice_id = tuple(
+                        map(lambda x: int(x, base=16), parts[0].split(" "))
+                    )
                     desc = "  ".join(parts[1:])
                     names[(vendor_id, device_id, subvendor_id, subdevice_id)] = desc
             elif line.startswith("\t"):
@@ -66,13 +69,15 @@ class PCI_IDs:
         self.__names = names
         self.__classes = classes
 
-    def lookup(self, vendor_id, device_id, subsystem_vendor_id, subsystem_device_id, class_code):
+    def lookup(
+        self, vendor_id, device_id, subsystem_vendor_id, subsystem_device_id, class_code
+    ):
         acc = []
 
         # Class
         if class_code:
-            class_id = (class_code >> 16)
-            subclass_id = ((class_code >> 8) & 0xFF)
+            class_id = class_code >> 16
+            subclass_id = (class_code >> 8) & 0xFF
             if (class_id, subclass_id) in self.__classes.keys():
                 acc.append(self.__classes[(class_id, subclass_id)] + ":")
             elif (class_id,) in self.__classes.keys():
@@ -90,6 +95,7 @@ class PCI_IDs:
 
         return " ".join(acc)
 
+
 def lookup_pci_device(element, ids):
     vendor_id = get_node(element, "vendor/text()")
     device_id = get_node(element, "identifier/text()")
@@ -97,11 +103,14 @@ def lookup_pci_device(element, ids):
     subsystem_device_id = get_node(element, "subsystem_identifier/text()")
     class_code = get_node(element, "class/text()")
 
-    args = [vendor_id, device_id, subsystem_vendor_id, subsystem_device_id, class_code]
-    desc = ids.lookup(*list(map(lambda x: int(x, base=16) if x else None, args)))
+    args = [vendor_id, device_id, subsystem_vendor_id,
+            subsystem_device_id, class_code]
+    desc = ids.lookup(
+        *list(map(lambda x: int(x, base=16) if x else None, args)))
 
     if desc:
         element.set("description", desc)
+
 
 def lookup_pci_devices(board_etree):
     # Lookup names of PCI devices from pci.ids if possible
@@ -123,7 +132,10 @@ def lookup_pci_devices(board_etree):
             for bus in buses:
                 lookup_pci_device(bus, ids)
     else:
-        logging.info(f"Cannot find pci.ids under /usr/share. PCI device names will not be available.")
+        logging.info(
+            f"Cannot find pci.ids under /usr/share. PCI device names will not be available."
+        )
+
 
 def extract(args, board_etree):
     lookup_pci_devices(board_etree)

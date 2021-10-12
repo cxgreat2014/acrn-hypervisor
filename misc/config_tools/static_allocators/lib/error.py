@@ -5,5 +5,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
+
 class ResourceError(Exception):
     """Raise this error when it is out of resource"""

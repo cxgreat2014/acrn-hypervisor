@@ -32,25 +32,37 @@ import ctypes
 import textwrap
 import uuid
 
+
 def print_fields(cls):
     with ttypager.page():
         print("{}".format(cls.__name__))
-        print("{:20s} {:6} {:6}".format('field', 'length', 'offset'))
+        print("{:20s} {:6} {:6}".format("field", "length", "offset"))
         for f in cls._fields_:
             a = getattr(cls, f[0])
             print("{:20s} {:6} {:6}".format(f[0], a.size, a.offset))
 
+
 def to_bytes(var):
     return (ctypes.c_char * ctypes.sizeof(var)).from_buffer(var).raw
 
+
 _CTYPES_HEX_TYPES = (
     ctypes.c_void_p,
-    ctypes.c_uint8, ctypes.c_uint16, ctypes.c_uint32, ctypes.c_uint64,
-    ctypes.c_ubyte, ctypes.c_ushort, ctypes.c_uint, ctypes.c_ulong, ctypes.c_ulonglong,
+    ctypes.c_uint8,
+    ctypes.c_uint16,
+    ctypes.c_uint32,
+    ctypes.c_uint64,
+    ctypes.c_ubyte,
+    ctypes.c_ushort,
+    ctypes.c_uint,
+    ctypes.c_ulong,
+    ctypes.c_ulonglong,
 )
+
 
 class c_base(object):
     """Base class for ctypes structures and unions."""
+
     @staticmethod
     def _formatval(t, val):
         if val is not None and t in _CTYPES_HEX_TYPES:
@@ -59,15 +71,17 @@ class c_base(object):
             if issubclass(t._type_, (ctypes.c_char, ctypes.c_wchar)):
                 return "'{}'".format(val)
             else:
-                return "[{}]".format(", ".join(Struct._formatval(t._type_, item) for item in val))
+                return "[{}]".format(
+                    ", ".join(Struct._formatval(t._type_, item)
+                              for item in val)
+                )
         return "{}".format(val)
-
 
     def _formatter(self, field):
         name = field[0]
         t = field[1]
         val = getattr(self, name)
-        if hasattr(self, '_formats'):
+        if hasattr(self, "_formats"):
             f = self._formats.get(name, None)
             if f:
                 return f(val)
@@ -87,9 +101,18 @@ class c_base(object):
     _indent = ""
 
     def _wrap(self, str, indent=True):
-        line_len = 77 - len(self._indent + '  ')
-        _wrapper = textwrap.TextWrapper(width=line_len, initial_indent=self._indent, subsequent_indent=self._indent + '  ')
-        _wrapper_indentall = textwrap.TextWrapper(width=line_len, initial_indent=self._indent + '  ', subsequent_indent=self._indent + '  ')
+        line_len = 77 - len(self._indent + "  ")
+        _wrapper = textwrap.TextWrapper(
+            width=line_len,
+            initial_indent=self._indent,
+            subsequent_indent=self._indent + "  ",
+        )
+        _wrapper_indentall = textwrap.TextWrapper(
+            width=line_len,
+            initial_indent=self._indent + "  ",
+            subsequent_indent=self._indent + "  ",
+        )
+
         def __wrap():
             wrapper = _wrapper
             for line in str.split("\n"):
@@ -100,7 +123,8 @@ class c_base(object):
                     yield wrapped_line
                 if indent:
                     wrapper = _wrapper_indentall
-        return '\n'.join(__wrap())
+
+        return "\n".join(__wrap())
 
     def preface_field(self, field):
         a = getattr(self.__class__, field[0])
@@ -123,21 +147,36 @@ class c_base(object):
 
     def __str__(self):
         self._indent += "  "
-        s = "{}({})".format(self.__class__.__name__, "".join("\n{}{}={}{}".format(self.preface_field(field), field[0], self.preface_bitfield(field), self._formatter(field)) for field in self._fields_))
+        s = "{}({})".format(
+            self.__class__.__name__,
+            "".join(
+                "\n{}{}={}{}".format(
+                    self.preface_field(field),
+                    field[0],
+                    self.preface_bitfield(field),
+                    self._formatter(field),
+                )
+                for field in self._fields_
+            ),
+        )
         self._indent = ""
         return self._wrap(s)
 
+
 class Struct(ctypes.Structure, c_base):
     """Base class for ctypes structures."""
+
     def __hash__(self):
         buf = (ctypes.c_uint8 * ctypes.sizeof(self)).from_buffer(self)
         return binascii.crc32(buf)
 
     def __cmp__(self, other):
         return cmp(hash(self), hash(other))
+
 
 class Union(ctypes.Union, c_base):
     """Base class for ctypes unions."""
+
     def __hash__(self):
         buf = (ctypes.c_uint8 * ctypes.sizeof(self)).from_buffer(self)
         return binascii.crc32(buf)
@@ -145,9 +184,10 @@ class Union(ctypes.Union, c_base):
     def __cmp__(self, other):
         return cmp(hash(self), hash(other))
 
+
 class GUID(Struct):
     _fields_ = [
-        ('Data', ctypes.c_ubyte * 16),
+        ("Data", ctypes.c_ubyte * 16),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -159,7 +199,7 @@ class GUID(Struct):
         u = kwargs.get("uuid")
         if u is not None:
             self.uuid = u
-        elif not(args) and not(kwargs):
+        elif not (args) and not (kwargs):
             self.uuid = uuid.UUID(int=0)
         elif args and isinstance(args[0], uuid.UUID):
             self.uuid = args[0]
@@ -170,7 +210,10 @@ class GUID(Struct):
         return uuid.UUID(bytes_le=to_bytes(self))
 
     def _set_uuid(self, u):
-        ctypes.memmove(ctypes.addressof(self), ctypes.c_char_p(u.bytes_le), ctypes.sizeof(self))
+        ctypes.memmove(
+            ctypes.addressof(self), ctypes.c_char_p(
+                u.bytes_le), ctypes.sizeof(self)
+        )
 
     uuid = property(_get_uuid, _set_uuid)
 
@@ -190,12 +233,14 @@ class GUID(Struct):
     def __str__(self):
         return "{}".format(self.uuid)
 
+
 def _format_guid(val):
     try:
         import efi
+
         guid_str = efi.known_uuids.get(val.uuid, None)
     except:
         guid_str = None
     if guid_str:
-        return '{} ({})'.format(val, guid_str)
-    return '{}'.format(val)
+        return "{} ({})".format(val, guid_str)
+    return "{}".format(val)

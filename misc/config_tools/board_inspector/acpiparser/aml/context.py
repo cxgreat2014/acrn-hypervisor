@@ -10,6 +10,7 @@ from math import floor
 from .exception import *
 from .stream import Stream
 
+
 class NamedDecl:
     @staticmethod
     def object_type():
@@ -22,6 +23,7 @@ class NamedDecl:
     def dump(self):
         print(f"{self.name}: {self.__class__.__name__}")
 
+
 class FieldDecl(NamedDecl):
     def __init__(self, name, length, tree):
         super().__init__(name, tree)
@@ -30,6 +32,7 @@ class FieldDecl(NamedDecl):
     def dump(self):
         print(f"{self.name}: {self.__class__.__name__}, {self.length} bits")
 
+
 class OperationRegionDecl(NamedDecl):
     @staticmethod
     def object_type():
@@ -37,6 +40,7 @@ class OperationRegionDecl(NamedDecl):
 
     def __init__(self, name, tree):
         super().__init__(name, tree)
+
 
 class OperationFieldDecl(NamedDecl):
     def __init__(self, name, length, tree):
@@ -63,11 +67,16 @@ class OperationFieldDecl(NamedDecl):
             byte_index = floor(bit_index / 8)
             offset_in_byte = bit_index % 8
             if isinstance(self.region, str):
-                print(f"{self.name}: {self.__class__.__name__}, {self.region}: bit {hex(bit_index)} (byte {hex(byte_index)}.{offset_in_byte}), {self.length} bits")
+                print(
+                    f"{self.name}: {self.__class__.__name__}, {self.region}: bit {hex(bit_index)} (byte {hex(byte_index)}.{offset_in_byte}), {self.length} bits"
+                )
             else:
-                print(f"{self.name}: {self.__class__.__name__}, ({self.region[0]}, {self.region[1]}): bit {hex(bit_index)} (byte {hex(byte_index)}.{offset_in_byte}), {self.length} bits")
+                print(
+                    f"{self.name}: {self.__class__.__name__}, ({self.region[0]}, {self.region[1]}): bit {hex(bit_index)} (byte {hex(byte_index)}.{offset_in_byte}), {self.length} bits"
+                )
         else:
             print(f"{self.name}: {self.__class__.__name__}, {self.length} bits")
+
 
 class AliasDecl(NamedDecl):
     def __init__(self, name, source, tree):
@@ -77,6 +86,7 @@ class AliasDecl(NamedDecl):
 
     def dump(self):
         print(f"{self.name}: {self.__class__.__name__}, aliasing {self.source}")
+
 
 class MethodDecl(NamedDecl):
     @staticmethod
@@ -89,6 +99,7 @@ class MethodDecl(NamedDecl):
 
     def dump(self):
         print(f"{self.name}: {self.__class__.__name__}, {self.nargs} args")
+
 
 class PredefinedMethodDecl(NamedDecl):
     @staticmethod
@@ -103,6 +114,7 @@ class PredefinedMethodDecl(NamedDecl):
     def dump(self):
         print(f"{self.name}: {self.__class__.__name__}, {self.nargs} args")
 
+
 class DeviceDecl(NamedDecl):
     @staticmethod
     def object_type():
@@ -111,16 +123,20 @@ class DeviceDecl(NamedDecl):
     def __init__(self, name, tree):
         super().__init__(name, tree)
 
+
 def predefined_osi(args):
     feature = args[0].get()
     if feature.startswith("Linux"):
-        return 0xffffffff
-    elif feature.startswith("Windows") or \
-         feature.startswith("FreeBSD") or \
-         feature.startswith("HP-UX") or \
-         feature.startswith("OpenVMS"):
+        return 0xFFFFFFFF
+    elif (
+        feature.startswith("Windows")
+        or feature.startswith("FreeBSD")
+        or feature.startswith("HP-UX")
+        or feature.startswith("OpenVMS")
+    ):
         return 0
-    return 0xffffffff
+    return 0xFFFFFFFF
+
 
 class Context:
     @staticmethod
@@ -167,8 +183,8 @@ class Context:
     @staticmethod
     def normalize_namepath(namepath):
         path = namepath.lstrip("\\^")
-        prefix = namepath[:(len(namepath) - len(path))]
-        parts = '.'.join(map(lambda x: x[:4].ljust(4, '_'), path.split(".")))
+        prefix = namepath[: (len(namepath) - len(path))]
+        parts = ".".join(map(lambda x: x[:4].ljust(4, "_"), path.split(".")))
         return prefix + parts
 
     def __init__(self):
@@ -223,18 +239,21 @@ class Context:
             self.__current_scope = new_scope
         elif isinstance(new_scope, str):
             if new_scope.startswith("\\"):
-                self.__current_scope = [i for i in new_scope[1:].split(".") if i]
+                self.__current_scope = [
+                    i for i in new_scope[1:].split(".") if i]
             elif new_scope.startswith("^"):
                 parent_count = new_scope.count("^")
                 assert parent_count <= len(self.__current_scope)
-                self.__current_scope = self.__current_scope[:-parent_count].extend(new_scope.split("."))
+                self.__current_scope = self.__current_scope[:-parent_count].extend(
+                    new_scope.split(".")
+                )
             else:
                 self.__current_scope.extend(new_scope.split("."))
         else:
             raise InvalidPath(new_scope)
 
     def pop_scope(self):
-        assert(self.__scope_history)
+        assert self.__scope_history
         self.__current_scope = self.__scope_history.pop()
 
     def __register_symbol(self, symbol):
@@ -253,7 +272,9 @@ class Context:
                 elif new_tree.label == "DefExternal":
                     pass
                 else:
-                    logging.warning(f"{symbol.name} is redefined as {new_tree.label} (previously was {old_tree.label})")
+                    logging.warning(
+                        f"{symbol.name} is redefined as {new_tree.label} (previously was {old_tree.label})"
+                    )
                     self.__register_symbol(symbol)
         else:
             self.__register_symbol(symbol)
@@ -271,9 +292,11 @@ class Context:
                 sym = table[path]
                 # External object declarations are only for parsing. At
                 # interpretation time such declarations should not be looked up.
-                if (not self.__skip_external_on_lookup) or \
-                   isinstance(sym, PredefinedMethodDecl) or \
-                   (sym.tree and sym.tree.label != "DefExternal"):
+                if (
+                    (not self.__skip_external_on_lookup)
+                    or isinstance(sym, PredefinedMethodDecl)
+                    or (sym.tree and sym.tree.label != "DefExternal")
+                ):
                     return sym
             prefix_len -= 1
         raise KeyError(name)
@@ -288,7 +311,8 @@ class Context:
                 realpath = self.realpath(self.__current_scope, name)
                 ret = self.__symbol_table[realpath]
             else:
-                ret = self.__lookup_symbol_in_parents(self.__symbol_table, name)
+                ret = self.__lookup_symbol_in_parents(
+                    self.__symbol_table, name)
         except KeyError:
             ret = None
 
@@ -306,7 +330,8 @@ class Context:
             return False
 
     def lookup_symbol_by_tree(self, tree):
-        result = filter(lambda x: x[1].tree is tree, self.__symbol_table.items())
+        result = filter(lambda x: x[1].tree is tree,
+                        self.__symbol_table.items())
         try:
             return next(result)[1]
         except StopIteration:
@@ -325,7 +350,7 @@ class Context:
         return self.__devices
 
     def dump_symbols(self):
-        for k,v in sorted(self.__symbol_table.items()):
+        for k, v in sorted(self.__symbol_table.items()):
             v.dump()
 
     def enter_deferred_mode(self):
@@ -336,7 +361,7 @@ class Context:
         self.__deferred_mode_depth -= 1
 
     def in_deferred_mode(self):
-        return (self.__deferred_mode_depth > 0)
+        return self.__deferred_mode_depth > 0
 
     def skip_external_on_lookup(self):
         self.__skip_external_on_lookup = True

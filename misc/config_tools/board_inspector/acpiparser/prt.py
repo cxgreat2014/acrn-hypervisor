@@ -6,14 +6,20 @@
 from collections import namedtuple
 from .aml import datatypes, context
 
-class PRTMappingPackage(namedtuple("PRTMappingPackage", ["address", "pin", "source", "source_index"])):
+
+class PRTMappingPackage(
+    namedtuple("PRTMappingPackage", [
+               "address", "pin", "source", "source_index"])
+):
     def __repr__(self):
         if isinstance(self.source, context.DeviceDecl):
             s = self.source.name
         else:
             s = str(self.source)
         return "address=0x{0:08x}, pin=0x{1:02x}, source={2}, source_index=0x{3:08x}".format(
-            self.address, self.pin, s, self.source_index)
+            self.address, self.pin, s, self.source_index
+        )
+
 
 def parse_prt_mapping(x):
     address = x.elements[0].get()
@@ -28,6 +34,7 @@ def parse_prt_mapping(x):
     source_index = x.elements[3].get()
 
     return PRTMappingPackage(address, pin, source, source_index)
+
 
 def parse_pci_routing(package):
     """Parse ACPI PCI routing table returned by _PRT control methods."""

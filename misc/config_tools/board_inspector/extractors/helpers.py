@@ -5,15 +5,19 @@
 
 import lxml
 
+
 def add_child(element, tag, text=None, **kwargs):
     child = lxml.etree.Element(tag)
     child.text = text
-    for k,v in kwargs.items():
+    for k, v in kwargs.items():
         child.set(k, v)
     element.append(child)
     return child
 
+
 def get_node(etree, xpath):
     result = etree.xpath(xpath)
-    assert len(result) <= 1, "Internal error: cannot get texts from multiple nodes at a time"
+    assert (
+        len(result) <= 1
+    ), "Internal error: cannot get texts from multiple nodes at a time"
     return result[0] if len(result) == 1 else None

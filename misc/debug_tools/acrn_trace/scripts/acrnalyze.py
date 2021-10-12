@@ -13,13 +13,15 @@ import os
 from vmexit_analyze import analyze_vm_exit
 from irq_analyze import analyze_irq
 
+
 def usage():
     """print the usage of the script
     Args: NA
     Returns: None
     Raises: NA
     """
-    print ('''
+    print(
+        """
     [Usage] acrnalyze.py [options] [value] ...
 
     [options]
@@ -29,7 +31,9 @@ def usage():
     -f, --frequency=[unsigned int]: TSC frequency in MHz
     --vm_exit: to generate vm_exit report
     --irq: to generate irq related report
-    ''')
+    """
+    )
+
 
 def do_analysis(ifile, ofile, analyzer, freq):
     """do the specific analysis
@@ -47,6 +51,7 @@ def do_analysis(ifile, ofile, analyzer, freq):
     for alyer in analyzer:
         alyer(ifile, ofile, freq)
 
+
 def main(argv):
     """Main enterance function
 
@@ -57,8 +62,8 @@ def main(argv):
     Raises:
         GetoptError
     """
-    inputfile = ''
-    outputfile = ''
+    inputfile = ""
+    outputfile = ""
     # Default TSC frequency of MRB in MHz
     freq = 1881.6
     opts_short = "hi:o:f:"
@@ -72,7 +77,7 @@ def main(argv):
         sys.exit(1)
 
     for opt, arg in opts:
-        if opt == '-h':
+        if opt == "-h":
             usage()
             sys.exit()
         elif opt in ("-i", "--ifile"):
@@ -88,11 +93,12 @@ def main(argv):
         else:
             assert False, "unhandled option"
 
-    assert inputfile != '', "input file is required"
-    assert outputfile != '', "output file is required"
-    assert analyzer != '', 'MUST contain one of analyzer: ''vm_exit'
+    assert inputfile != "", "input file is required"
+    assert outputfile != "", "output file is required"
+    assert analyzer != "", "MUST contain one of analyzer: " "vm_exit"
 
     do_analysis(inputfile, outputfile, analyzer, freq)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])

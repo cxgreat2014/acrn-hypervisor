@@ -20,11 +20,11 @@ import os
 import sys
 from datetime import datetime
 
-sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath("."))
 
 RELEASE = ""
 if "RELEASE" in os.environ:
-   RELEASE = os.environ["RELEASE"]
+    RELEASE = os.environ["RELEASE"]
 
 # -- General configuration ------------------------------------------------
 
@@ -36,42 +36,48 @@ if "RELEASE" in os.environ:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 
-sys.path.insert(0, os.path.join(os.path.abspath('.'), 'extensions'))
+sys.path.insert(0, os.path.join(os.path.abspath("."), "extensions"))
 extensions = [
-   'breathe', 'sphinx.ext.graphviz', 'sphinx.ext.extlinks',
-   'eager_only', 'html_redirects', 'link_roles',
-   'sphinx_tabs.tabs'
+    "breathe",
+    "sphinx.ext.graphviz",
+    "sphinx.ext.extlinks",
+    "eager_only",
+    "html_redirects",
+    "link_roles",
+    "sphinx_tabs.tabs",
 ]
 
 # extlinks provides a macro template
 
-extlinks = {'acrn-commit': ('https://github.com/projectacrn/acrn-hypervisor/commit/%s', ''),
-            'acrn-issue': ('https://github.com/projectacrn/acrn-hypervisor/issues/%s', '')
-           }
+extlinks = {
+    "acrn-commit": ("https://github.com/projectacrn/acrn-hypervisor/commit/%s", ""),
+    "acrn-issue": ("https://github.com/projectacrn/acrn-hypervisor/issues/%s", ""),
+}
 
 
-graphviz_output_format='png'
-graphviz_dot_args=[
-   '-Nfontname="verdana"',
-   '-Gfontname="verdana"',
-   '-Efontname="verdana"']
+graphviz_output_format = "png"
+graphviz_dot_args = [
+    '-Nfontname="verdana"',
+    '-Gfontname="verdana"',
+    '-Efontname="verdana"',
+]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = u'Project ACRN™'
-copyright = u'2018-' + str(datetime.now().year) + u', ' + project
-author = u'Project ACRN developers'
+project = u"Project ACRN™"
+copyright = u"2018-" + str(datetime.now().year) + u", " + project
+author = u"Project ACRN developers"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -88,27 +94,29 @@ try:
     version_minor = None
     version_rc = None
 
-    for line in open(os.path.realpath("../../../VERSION")) :
+    for line in open(os.path.realpath("../../../VERSION")):
         # remove comments
-        line = line.split('#', 1)[0]
+        line = line.split("#", 1)[0]
         line = line.rstrip()
-        if (line.count("=") == 1) :
-           key, val = [x.strip() for x in line.split('=', 2)]
-           if key == 'MAJOR_VERSION':
-              version_major = val
-           if key == 'MINOR_VERSION':
-              version_minor = val
-           if key == 'EXTRA_VERSION':
-              version_rc = val
-           if version_major and version_minor and version_rc :
-              break
+        if line.count("=") == 1:
+            key, val = [x.strip() for x in line.split("=", 2)]
+            if key == "MAJOR_VERSION":
+                version_major = val
+            if key == "MINOR_VERSION":
+                version_minor = val
+            if key == "EXTRA_VERSION":
+                version_rc = val
+            if version_major and version_minor and version_rc:
+                break
 finally:
-    if version_major and version_minor :
-        version = release = str(version_major) + '.' + str(version_minor)
-        if version_rc :
-          version = release = version + version_rc
+    if version_major and version_minor:
+        version = release = str(version_major) + "." + str(version_minor)
+        if version_rc:
+            version = release = version + version_rc
     else:
-        sys.stderr.write('Warning: Could not extract hypervisor version from VERSION file\n')
+        sys.stderr.write(
+            "Warning: Could not extract hypervisor version from VERSION file\n"
+        )
         version = release = "unknown"
 
 #
@@ -127,10 +135,10 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'misc/README.rst' ]
+exclude_patterns = ["_build", "misc/README.rst"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -143,29 +151,30 @@ todo_include_todos = False
 try:
     import sphinx_rtd_theme
 except ImportError:
-    html_theme = 'alabaster'
+    html_theme = "alabaster"
     # This is required for the alabaster theme
     # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
     html_sidebars = {
-        '**': [
-            'relations.html',  # needs 'show_related': True theme option to display
-            'searchbox.html',
-            ]
-        }
-    sys.stderr.write('Warning: sphinx_rtd_theme missing. Use pip to install it.\n')
+        "**": [
+            "relations.html",  # needs 'show_related': True theme option to display
+            "searchbox.html",
+        ]
+    }
+    sys.stderr.write(
+        "Warning: sphinx_rtd_theme missing. Use pip to install it.\n")
 else:
     html_theme = "sphinx_rtd_theme"
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
     html_theme_options = {
-        'canonical_url': '',
-        'analytics_id': '',
-        'logo_only': False,
-        'display_version': True,
-        #'prev_next_buttons_location': 'None',
+        "canonical_url": "",
+        "analytics_id": "",
+        "logo_only": False,
+        "display_version": True,
+        # 'prev_next_buttons_location': 'None',
         # Toc options
-        'collapse_navigation': False,
-        'sticky_navigation': True,
-        'navigation_depth': 4,
+        "collapse_navigation": False,
+        "sticky_navigation": True,
+        "navigation_depth": 4,
     }
 
 
@@ -175,37 +184,38 @@ else:
 # folder (specified via the VERSION file as processed earlier or
 # overridden on the make command line with RELEASE=name.
 
-if tags.has('release'):
-   is_release = True
-   docs_title = '%s' %(version)
-   current_version = version
-   if RELEASE:
-      version = release = current_version = RELEASE
-      docs_title = '%s' %(version)
+if tags.has("release"):
+    is_release = True
+    docs_title = "%s" % (version)
+    current_version = version
+    if RELEASE:
+        version = release = current_version = RELEASE
+        docs_title = "%s" % (version)
 else:
-   version = current_version = "latest"
-   is_release = False
-   docs_title = 'Latest'
+    version = current_version = "latest"
+    is_release = False
+    docs_title = "Latest"
 
 html_context = {
-   'current_version': current_version,
-   'docs_title': docs_title,
-   'is_release': is_release,
-   'versions': ( ("latest", "/latest/"),
-                 ("2.6", "/2.6/"),
-                 ("2.5", "/2.5/"),
-                 ("2.4", "/2.4/"),
-                 ("2.3", "/2.3/"),
-                 ("2.2", "/2.2/"),
-                 ("2.1", "/2.1/"),
-                 ("2.0", "/2.0/"),
-                 ("1.6.1", "/1.6.1/"),
-                 ("1.6", "/1.6/"),
-                 ("1.5", "/1.5/"),
-                 ("1.4", "/1.4/"),
-                 ("1.0", "/1.0/"),   # keep 1.0
-               )
-    }
+    "current_version": current_version,
+    "docs_title": docs_title,
+    "is_release": is_release,
+    "versions": (
+        ("latest", "/latest/"),
+        ("2.6", "/2.6/"),
+        ("2.5", "/2.5/"),
+        ("2.4", "/2.4/"),
+        ("2.3", "/2.3/"),
+        ("2.2", "/2.2/"),
+        ("2.1", "/2.1/"),
+        ("2.0", "/2.0/"),
+        ("1.6.1", "/1.6.1/"),
+        ("1.6", "/1.6/"),
+        ("1.5", "/1.5/"),
+        ("1.4", "/1.4/"),
+        ("1.0", "/1.0/"),  # keep 1.0
+    ),
+}
 
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -214,31 +224,39 @@ html_context = {
 #
 # html_theme_options = {}
 
-html_logo = 'images/ACRN_Logo_200w.png'
-html_favicon = 'images/ACRN-favicon-32x32.png'
+html_logo = "images/ACRN_Logo_200w.png"
+html_favicon = "images/ACRN-favicon-32x32.png"
 
 numfig = True
-#numfig_secnum_depth = (2)
-numfig_format = {'figure': 'Figure %s', 'table': 'Table %s', 'code-block': 'Code Block %s'}
+# numfig_secnum_depth = (2)
+numfig_format = {
+    "figure": "Figure %s",
+    "table": "Table %s",
+    "code-block": "Code Block %s",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['static']
+html_static_path = ["static"]
+
 
 def setup(app):
-   import sphinx
+    import sphinx
 
-   if float(sphinx.__version__[0:3]) < 3.0:
-      app.add_stylesheet("acrn-custom.css")
-      app.add_javascript("https://www.googletagmanager.com/gtag/js?id=UA-831873-64")
-      # note more GA tag manager calls are in acrn-custom.js
-      app.add_javascript("acrn-custom.js")
-   else:
-      app.add_css_file("acrn-custom.css")
-      app.add_js_file("https://www.googletagmanager.com/gtag/js?id=UA-831873-64")
-      # note more GA tag manager calls are in acrn-custom.js
-      app.add_js_file("acrn-custom.js")
+    if float(sphinx.__version__[0:3]) < 3.0:
+        app.add_stylesheet("acrn-custom.css")
+        app.add_javascript(
+            "https://www.googletagmanager.com/gtag/js?id=UA-831873-64")
+        # note more GA tag manager calls are in acrn-custom.js
+        app.add_javascript("acrn-custom.js")
+    else:
+        app.add_css_file("acrn-custom.css")
+        app.add_js_file(
+            "https://www.googletagmanager.com/gtag/js?id=UA-831873-64")
+        # note more GA tag manager calls are in acrn-custom.js
+        app.add_js_file("acrn-custom.js")
+
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -253,16 +271,16 @@ html_show_sourcelink = False
 # If not '', a 'Last updated on:' timestamp is inserted at every page
 # bottom,
 # using the given strftime format.
-html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = "%b %d, %Y"
 
 # The name of a javascript file (relative to the configuration directory) that
 # implements a search results scorer. If empty, the default will be used.
-html_search_scorer = 'scorer.js'
+html_search_scorer = "scorer.js"
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'ACRN Project Help'
+htmlhelp_basename = "ACRN Project Help"
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -270,23 +288,20 @@ htmlhelp_basename = 'ACRN Project Help'
 latex_engine = "xelatex"
 
 latex_elements = {
-    'fontpkg': r'''
+    "fontpkg": r"""
 \setmainfont{DejaVu Serif}
 \setsansfont{DejaVu Sans}
 \setmonofont{DejaVu Sans Mono}
-''',
-
+""",
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
-
     # The font size ('10pt', '11pt' or '12pt').
     #
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     #
-    'preamble': r'''
+    "preamble": r"""
 \setcounter{tocdepth}{3}
 \renewcommand\_{\textunderscore\allowbreak}
 \usepackage{listings}
@@ -296,8 +311,8 @@ latex_elements = {
 \title{\normalfont\\color{IntelMNBlue}}
 \usepackage{colortbl}
 \protected\def\sphinxstyletheadfamily{\cellcolor[HTML]{DCDCDC}\sffamily\bfseries\color{IntelMNBlue}}
-''',
-    'sphinxsetup': 'hmargin={0.7in,0.7in}, vmargin={1in,1in},\
+""",
+    "sphinxsetup": "hmargin={0.7in,0.7in}, vmargin={1in,1in},\
 verbatimwithframe=true,\
 verbatimwrapslines=true,\
 TitleColor={HTML}{003C71},\
@@ -306,8 +321,7 @@ InnerLinkColor={HTML}{003C71},\
 OuterLinkColor={HTML}{003C71},\
 VerbatimColor={HTML}{F0F0F0},\
 VerbatimHighlightColor={HTML}{76CEFF},\
-VerbatimBorderColor={HTML}{00285A}',
-
+VerbatimBorderColor={HTML}{00285A}",
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
@@ -317,20 +331,16 @@ VerbatimBorderColor={HTML}{00285A}',
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'acrn.tex', u'Project ACRN Documentation',
-     u'Project ACRN', 'manual'),
+    (master_doc, "acrn.tex", u"Project ACRN Documentation", u"Project ACRN", "manual"),
 ]
 
-latex_logo = 'images/ACRN_Logo_PrimaryLockup_COLOR-300x300-1.png'
+latex_logo = "images/ACRN_Logo_PrimaryLockup_COLOR-300x300-1.png"
 
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'acrn', u'Project ACRN Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, "acrn", u"Project ACRN Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -339,10 +349,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Project ACRN', u'Project ACRN Documentation',
-     author, 'Project ACRN',
-     'IoT-Optimized Hypervisor for Intel Architecture',
-     'Miscellaneous'),
+    (
+        master_doc,
+        "Project ACRN",
+        u"Project ACRN Documentation",
+        author,
+        "Project ACRN",
+        "IoT-Optimized Hypervisor for Intel Architecture",
+        "Miscellaneous",
+    ),
 ]
 
 rst_epilog = """
@@ -351,24 +366,27 @@ rst_epilog = """
 
 
 breathe_projects = {
-	"Project ACRN" : "doxygen/xml",
+    "Project ACRN": "doxygen/xml",
 }
 breathe_default_project = "Project ACRN"
 # breathe_default_members = ('members', 'undoc-members', 'content-only')
 breathe_domain_by_extension = {
-   "h": "c",
-   "c": "c",
+    "h": "c",
+    "c": "c",
 }
 
 cpp_id_attributes = [
-    '__syscall', '__deprecated', '__may_alias',
-    '__used', '__unused', '__weak',
-    '__DEPRECATED_MACRO', 'FUNC_NORETURN',
-    '__subsystem',
+    "__syscall",
+    "__deprecated",
+    "__may_alias",
+    "__used",
+    "__unused",
+    "__weak",
+    "__DEPRECATED_MACRO",
+    "FUNC_NORETURN",
+    "__subsystem",
 ]
 c_id_attributes = cpp_id_attributes
-
-
 
 
 # Custom added feature to allow redirecting old URLs (caused by
@@ -379,13 +397,13 @@ c_id_attributes = cpp_id_attributes
 # URLs must be relative to document root (with NO leading slash),
 # and without the html extension)
 html_redirect_pages = [
-   ('developer-guides/index', 'contribute'),
-   ('getting-started/index', 'try'),
-   ('user-guides/index', 'develop'),
-   ('tutorials/index', 'develop'),
-   ('hardware', 'reference/hardware'),
-   ('release_notes', 'release_notes/index'),
-   ('getting-started/rt_industry', 'getting-started/getting-started'),
-   ('getting-started/rt_industry_ubuntu', 'getting-started/getting-started'),
-   ('getting-started/building-from-source', 'getting-started/getting-started'),
-   ]
+    ("developer-guides/index", "contribute"),
+    ("getting-started/index", "try"),
+    ("user-guides/index", "develop"),
+    ("tutorials/index", "develop"),
+    ("hardware", "reference/hardware"),
+    ("release_notes", "release_notes/index"),
+    ("getting-started/rt_industry", "getting-started/getting-started"),
+    ("getting-started/rt_industry_ubuntu", "getting-started/getting-started"),
+    ("getting-started/building-from-source", "getting-started/getting-started"),
+]

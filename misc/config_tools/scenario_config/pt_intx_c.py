@@ -20,12 +20,22 @@ def generate_file(vm_info, config):
     print("#include <asm/vm_config.h>", file=config)
     print("", file=config)
 
-    if (board_cfg_lib.is_matched_board(("ehl-crb-b"))
+    if (
+        board_cfg_lib.is_matched_board(("ehl-crb-b"))
         and vm_info.pt_intx_info.phys_gsi.get(0) is not None
-        and len(vm_info.pt_intx_info.phys_gsi[0]) > 0):
+        and len(vm_info.pt_intx_info.phys_gsi[0]) > 0
+    ):
 
-        print("struct pt_intx_config vm0_pt_intx[{}U] = {{".format(len(vm_info.pt_intx_info.phys_gsi[0])), file=config)
-        for i, (p_pin, v_pin) in enumerate(zip(vm_info.pt_intx_info.phys_gsi[0], vm_info.pt_intx_info.virt_gsi[0])):
+        print(
+            "struct pt_intx_config vm0_pt_intx[{}U] = {{".format(
+                len(vm_info.pt_intx_info.phys_gsi[0])
+            ),
+            file=config,
+        )
+        for i, (p_pin, v_pin) in enumerate(
+            zip(vm_info.pt_intx_info.phys_gsi[0],
+                vm_info.pt_intx_info.virt_gsi[0])
+        ):
             print("\t[{}U] = {{".format(i), file=config)
             print("\t\t.phys_gsi = {}U,".format(p_pin), file=config)
             print("\t\t.virt_gsi = {}U,".format(v_pin), file=config)

@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-var Scorer = {
+const Scorer = {
   // Implement the following function to further tweak the score for
   // each result The function takes a result array [filename, title,
   // anchor, descr, score] and returns the new score.
@@ -14,19 +14,15 @@ var Scorer = {
   // For ACRN search results, push display down for release_notes and
   // api docs so "regular" docs will show up before them
 
-  score: function(result) {
-
-    if (result[0].search("release_notes/")>=0) {
-       return -6;
-    }
-    else if (result[0].search("api/")>=0) {
-       return -5;
-    }
-    else if (result[0].search("kconfig/")>=0) {
-       return -5;
-    }
-    else {
-       return result[4];
+  score: function (result) {
+    if (result[0].search('release_notes/') >= 0) {
+      return -6
+    } else if (result[0].search('api/') >= 0) {
+      return -5
+    } else if (result[0].search('kconfig/') >= 0) {
+      return -5
+    } else {
+      return result[4]
     }
   },
 
@@ -35,9 +31,11 @@ var Scorer = {
   // or matches in the last dotted part of the object name
   objPartialMatch: 6,
   // Additive scores depending on the priority of the object
-  objPrio: {0:  15,   // used to be importantResults
-            1:  5,   // used to be objectResults
-            2: -5},  // used to be unimportantResults
+  objPrio: {
+    0: 15, // used to be importantResults
+    1: 5, // used to be objectResults
+    2: -5
+  }, // used to be unimportantResults
   //  Used when the priority is not in the mapping.
   objPrioDefault: 0,
 
@@ -45,4 +43,4 @@ var Scorer = {
   title: 15,
   // query found in terms
   term: 5
-};
+}

@@ -5,11 +5,7 @@
 
 import parser_lib
 
-RDT_TYPE = {
-        "L2":4,
-        "L3":2,
-        "MBA":8
-    }
+RDT_TYPE = {"L2": 4, "L3": 2, "MBA": 8}
 
 
 def dump_cpuid_reg(cmd, reg):
@@ -34,18 +30,18 @@ def dump_cpuid_reg(cmd, reg):
         if len(line.split()) <= 2:
             continue
 
-        reg_value = line.split()[idx].split('=')[1]
+        reg_value = line.split()[idx].split("=")[1]
 
         if reg == "eax":
             res_info = int(reg_value, 16) + 1
             break
         elif reg == "ebx":
             res_info = []
-            if int(reg_value, 16) & RDT_TYPE['L2'] != 0:
+            if int(reg_value, 16) & RDT_TYPE["L2"] != 0:
                 res_info.append("L2")
-            if int(reg_value, 16) & RDT_TYPE['L3'] != 0:
+            if int(reg_value, 16) & RDT_TYPE["L3"] != 0:
                 res_info.append("L3")
-            if int(reg_value, 16) & RDT_TYPE['MBA'] != 0:
+            if int(reg_value, 16) & RDT_TYPE["MBA"] != 0:
                 res_info.append("MBA")
             break
         elif reg == "edx":
@@ -91,10 +87,19 @@ def generate_info(board_info):
     """
     (rdt_res, rdt_res_clos_max, rdt_res_mask_max) = get_clos_info()
 
-    with open(board_info, 'a+') as config:
+    with open(board_info, "a+") as config:
         print("\t<CLOS_INFO>", file=config)
-        if ((len(rdt_res) != 0) and (len(rdt_res_clos_max) != 0)):
-            print("\trdt resources supported:", ', '.join(rdt_res), file=config)
-            print("\trdt resource clos max:",str(rdt_res_clos_max).strip('[]'), file=config)
-            print("\trdt resource mask max:",str(rdt_res_mask_max).strip('[]'), file=config)
+        if (len(rdt_res) != 0) and (len(rdt_res_clos_max) != 0):
+            print("\trdt resources supported:",
+                  ", ".join(rdt_res), file=config)
+            print(
+                "\trdt resource clos max:",
+                str(rdt_res_clos_max).strip("[]"),
+                file=config,
+            )
+            print(
+                "\trdt resource mask max:",
+                str(rdt_res_mask_max).strip("[]"),
+                file=config,
+            )
         print("\t</CLOS_INFO>\n", file=config)
