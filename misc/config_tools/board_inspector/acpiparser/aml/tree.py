@@ -10,7 +10,9 @@ from . import grammar
 
 
 class Tree:
-    def __init__(self, label=None, children=[]):
+    def __init__(self, label=None, children=None):
+        if children is None:
+            children = []
         self.label = label
         self.children = copy(children)
         self.scope = None

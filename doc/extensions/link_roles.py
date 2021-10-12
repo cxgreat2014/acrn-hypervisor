@@ -50,7 +50,11 @@ def setup(app):
 
 
 def autolink(pattern):
-    def role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    def role(name, rawtext, text, lineno, inliner, options=None, content=None):
+        if options is None:
+            options = {}
+        if content is None:
+            content = []
         m = re.search(r"(.*)\s*<(.*)>", text)
         if m:
             link_text = m.group(1)
