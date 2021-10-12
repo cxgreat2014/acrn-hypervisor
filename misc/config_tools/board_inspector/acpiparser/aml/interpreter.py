@@ -124,7 +124,8 @@ class ConcreteInterpreter(Interpreter):
         self.context.dump_bindings()
 
     # 20.2.2 Name Objects Encoding
-    def NullName(self, tree):
+    @staticmethod
+    def NullName(tree):
         return None
 
     def NameString(self, tree):
@@ -142,7 +143,8 @@ class ConcreteInterpreter(Interpreter):
         return obj
 
     # 20.2.3 Data Objects Encoding
-    def ByteList(self, tree):
+    @staticmethod
+    def ByteList(tree):
         return RawDataBuffer(tree.value)
 
     def ByteConst(self, tree):
@@ -157,28 +159,36 @@ class ConcreteInterpreter(Interpreter):
     def QWordConst(self, tree):
         return self.interpret(tree.children[0])
 
-    def String(self, tree):
+    @staticmethod
+    def String(tree):
         return String(tree.value)
 
-    def ByteData(self, tree):
+    @staticmethod
+    def ByteData(tree):
         return Integer(tree.value)
 
-    def WordData(self, tree):
+    @staticmethod
+    def WordData(tree):
         return Integer(tree.value)
 
-    def DWordData(self, tree):
+    @staticmethod
+    def DWordData(tree):
         return Integer(tree.value)
 
-    def QWordData(self, tree):
+    @staticmethod
+    def QWordData(tree):
         return Integer(tree.value)
 
-    def ZeroOp(self, tree):
+    @staticmethod
+    def ZeroOp(tree):
         return Integer(0x00)
 
-    def OneOp(self, tree):
+    @staticmethod
+    def OneOp(tree):
         return Integer(0x01)
 
-    def OnesOp(self, tree):
+    @staticmethod
+    def OnesOp(tree):
         return Integer(0xffffffffffffffff)
 
     # 20.2.5 Term Objects Encoding
@@ -227,7 +237,8 @@ class ConcreteInterpreter(Interpreter):
             return value
 
     # 20.2.5.1 Namespace Modifier Objects Encoding
-    def DefAlias(self, tree):
+    @staticmethod
+    def DefAlias(tree):
         return None
 
     def DefName(self, tree):
@@ -301,15 +312,18 @@ class ConcreteInterpreter(Interpreter):
         sym = self.context.lookup_symbol(fullpath)
         return Device(sym)
 
-    def DefExternal(self, tree):
+    @staticmethod
+    def DefExternal(tree):
         logging.info(f"The loaded tables do not have a definition of {tree.children[0].value}")
         return None
 
-    def DefField(self, tree):
+    @staticmethod
+    def DefField(tree):
         # Fields of operation regions are evaluated when they are used.
         return None
 
-    def DefMethod(self, tree):
+    @staticmethod
+    def DefMethod(tree):
         return Method(tree)
 
     def DefOpRegion(self, tree):
@@ -343,7 +357,8 @@ class ConcreteInterpreter(Interpreter):
         self.context.register_operation_region(sym.name, op_region)
         return op_region
 
-    def DefPowerRes(self, tree):
+    @staticmethod
+    def DefPowerRes(tree):
         return PowerResource(tree.NameString.value)
 
     # 20.2.5.3 Statement Opcodes Encoding
@@ -368,7 +383,8 @@ class ConcreteInterpreter(Interpreter):
                 self.interpret(tree.children[3])
         return None
 
-    def DefRelease(self, tree):
+    @staticmethod
+    def DefRelease(tree):
         return None
 
     def DefReturn(self, tree):
@@ -379,7 +395,8 @@ class ConcreteInterpreter(Interpreter):
         raise MethodReturn()
         return None
 
-    def DefSignal(self, tree):
+    @staticmethod
+    def DefSignal(tree):
         # Skip
         return None
 
@@ -418,7 +435,8 @@ class ConcreteInterpreter(Interpreter):
                 target.set(res)
         return res
 
-    def DefAcquire(self, tree):
+    @staticmethod
+    def DefAcquire(tree):
         # Pretend that the mutex is acquired
         return Integer(0x1)
 
@@ -552,7 +570,8 @@ class ConcreteInterpreter(Interpreter):
     def DefLOr(self, tree):
         return self.__eval_binary_op(tree, lambda x,y: 1 if x or y else 0)
 
-    def __match(self, op, obj, match_obj):
+    @staticmethod
+    def __match(op, obj, match_obj):
         try:
             if isinstance(match_obj, String):
                 return op(obj.to_string().get(), match_obj.get())

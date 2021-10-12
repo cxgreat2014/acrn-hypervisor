@@ -502,7 +502,8 @@ class ObjectCollector:
     def add_object(self, scope, obj):
         self.__objects[scope].append(obj)
 
-    def __get_scope_contents(self, termlist, path):
+    @staticmethod
+    def __get_scope_contents(termlist, path):
         scopes = [i for i in path.lstrip("\\").split(".") if i]
         ret = termlist
         for scope in scopes:
