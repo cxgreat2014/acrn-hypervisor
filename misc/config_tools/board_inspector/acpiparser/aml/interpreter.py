@@ -8,10 +8,13 @@ from .datatypes import *
 from .tree import Tree, Interpreter
 from . import builder
 
+
 class MethodReturn(Exception):
-    """ A pseudo exception to return from a method"""
+    """A pseudo exception to return from a method"""
+
     def __init__(self):
         pass
+
 
 class ConcreteInterpreter(Interpreter):
     class Argument(Object):
@@ -96,7 +99,8 @@ class ConcreteInterpreter(Interpreter):
             if v != None:
                 arg_trees.append(v)
             else:
-                raise NotImplementedError(f"Unsupported type of method argument: {arg}")
+                raise NotImplementedError(
+                    f"Unsupported type of method argument: {arg}")
 
         pseudo_invocation = builder.MethodInvocation(name_string, *arg_trees)
         try:
@@ -115,16 +119,18 @@ class ConcreteInterpreter(Interpreter):
                 return str(obj.get())
             else:
                 return str(obj)
+
         print("Stack:")
         for idx, frame in enumerate(self.stack):
-            arg = ', '.join(map(format_obj, frame.arg_objs))
-            local = ', '.join(map(format_obj, frame.local_objs))
+            arg = ", ".join(map(format_obj, frame.arg_objs))
+            local = ", ".join(map(format_obj, frame.local_objs))
             print(f" {idx}@{frame.method}: args: [{arg}] locals: [{local}]")
         print("Binding:")
         self.context.dump_bindings()
 
     # 20.2.2 Name Objects Encoding
-    def NullName(self, tree):
+    @staticmethod
+    def NullName(tree):
         return None
 
     def NameString(self, tree):
@@ -142,7 +148,8 @@ class ConcreteInterpreter(Interpreter):
         return obj
 
     # 20.2.3 Data Objects Encoding
-    def ByteList(self, tree):
+    @staticmethod
+    def ByteList(tree):
         return RawDataBuffer(tree.value)
 
     def ByteConst(self, tree):
@@ -157,29 +164,37 @@ class ConcreteInterpreter(Interpreter):
     def QWordConst(self, tree):
         return self.interpret(tree.children[0])
 
-    def String(self, tree):
+    @staticmethod
+    def String(tree):
         return String(tree.value)
 
-    def ByteData(self, tree):
+    @staticmethod
+    def ByteData(tree):
         return Integer(tree.value)
 
-    def WordData(self, tree):
+    @staticmethod
+    def WordData(tree):
         return Integer(tree.value)
 
-    def DWordData(self, tree):
+    @staticmethod
+    def DWordData(tree):
         return Integer(tree.value)
 
-    def QWordData(self, tree):
+    @staticmethod
+    def QWordData(tree):
         return Integer(tree.value)
 
-    def ZeroOp(self, tree):
+    @staticmethod
+    def ZeroOp(tree):
         return Integer(0x00)
 
-    def OneOp(self, tree):
+    @staticmethod
+    def OneOp(tree):
         return Integer(0x01)
 
-    def OnesOp(self, tree):
-        return Integer(0xffffffffffffffff)
+    @staticmethod
+    def OnesOp(tree):
+        return Integer(0xFFFFFFFFFFFFFFFF)
 
     # 20.2.5 Term Objects Encoding
     def TermList(self, tree):
@@ -222,12 +237,14 @@ class ConcreteInterpreter(Interpreter):
             # Invoke the predefined function in Python
             return Integer(value.fn(args))
         else:
-            assert value == None or isinstance(value, Object), \
-                f"{tree.children[0]} evaluates to a non-object value {value}"
+            assert value == None or isinstance(
+                value, Object
+            ), f"{tree.children[0]} evaluates to a non-object value {value}"
             return value
 
     # 20.2.5.1 Namespace Modifier Objects Encoding
-    def DefAlias(self, tree):
+    @staticmethod
+    def DefAlias(tree):
         return None
 
     def DefName(self, tree):
@@ -243,19 +260,22 @@ class ConcreteInterpreter(Interpreter):
     # 20.2.5.2 Named Objects Encoding
     def NamedField(self, tree):
         name = tree.children[0].value
-        sym = self.context.lookup_symbol(self.context.realpath(tree.scope, name))
+        sym = self.context.lookup_symbol(
+            self.context.realpath(tree.scope, name))
         assert isinstance(sym, OperationFieldDecl)
         assert sym.region, f"Field {sym.name} does not belong to any operation region."
         if isinstance(sym.region, str):
             buf = self.context.lookup_operation_region(sym.region)
             if not buf:
-                buf = self.interpret(self.context.lookup_symbol(sym.region).tree)
+                buf = self.interpret(
+                    self.context.lookup_symbol(sym.region).tree)
             buf.create_field(name, sym.offset, sym.length, sym.access_width)
             field = BufferField(buf, name)
         elif isinstance(sym.region, tuple):
             index_register = self.interpret(sym.region[0].tree)
             data_register = self.interpret(sym.region[1].tree)
-            buf = OperationRegion.open_indexed_region(index_register, data_register)
+            buf = OperationRegion.open_indexed_region(
+                index_register, data_register)
             buf.create_field(name, sym.offset, sym.length, sym.access_width)
             field = BufferField(buf, name)
         else:
@@ -301,49 +321,63 @@ class ConcreteInterpreter(Interpreter):
         sym = self.context.lookup_symbol(fullpath)
         return Device(sym)
 
-    def DefExternal(self, tree):
-        logging.info(f"The loaded tables do not have a definition of {tree.children[0].value}")
+    @staticmethod
+    def DefExternal(tree):
+        logging.info(
+            f"The loaded tables do not have a definition of {tree.children[0].value}"
+        )
         return None
 
-    def DefField(self, tree):
+    @staticmethod
+    def DefField(tree):
         # Fields of operation regions are evaluated when they are used.
         return None
 
-    def DefMethod(self, tree):
+    @staticmethod
+    def DefMethod(tree):
         return Method(tree)
 
     def DefOpRegion(self, tree):
         name = tree.children[0].value
-        sym = self.context.lookup_symbol(self.context.realpath(tree.scope, name))
+        sym = self.context.lookup_symbol(
+            self.context.realpath(tree.scope, name))
 
         space = self.interpret(tree.children[1]).get()
         offset = self.interpret(tree.children[2]).get()
         length = self.interpret(tree.children[3]).get()
-        assert isinstance(space, int) and isinstance(offset, int) and (length, int)
+        assert isinstance(space, int) and isinstance(
+            offset, int) and (length, int)
 
-        if space == 0x00:    # SystemMemory
-            op_region = OperationRegion.open_system_memory(sym.name, offset, length)
+        if space == 0x00:  # SystemMemory
+            op_region = OperationRegion.open_system_memory(
+                sym.name, offset, length)
         elif space == 0x01:  # SystemIO
-            op_region = OperationRegion.open_system_io(sym.name, offset, length)
+            op_region = OperationRegion.open_system_io(
+                sym.name, offset, length)
         elif space == 0x02:  # PCI_Config
             self.context.change_scope(tree.scope)
             device_path = self.context.parent(sym.name)
             bus_id = self.interpret_method_call(f"_BBN").get()
             if self.context.has_symbol(f"{device_path}._ADR"):
-                device_id = self.interpret_method_call(f"{device_path}._ADR").get()
+                device_id = self.interpret_method_call(
+                    f"{device_path}._ADR").get()
             elif self.context.has_symbol(f"{device_path}._BBN"):
                 # Device objects representing PCI host bridges may not have an _ADR object
                 device_id = 0
             self.context.pop_scope()
-            op_region = OperationRegion.open_pci_configuration_space(bus_id, device_id, offset, length)
+            op_region = OperationRegion.open_pci_configuration_space(
+                bus_id, device_id, offset, length
+            )
             pass
         else:
-            raise NotImplementedError(f"Cannot load operation region in space {space}")
+            raise NotImplementedError(
+                f"Cannot load operation region in space {space}")
 
         self.context.register_operation_region(sym.name, op_region)
         return op_region
 
-    def DefPowerRes(self, tree):
+    @staticmethod
+    def DefPowerRes(tree):
         return PowerResource(tree.NameString.value)
 
     # 20.2.5.3 Statement Opcodes Encoding
@@ -368,7 +402,8 @@ class ConcreteInterpreter(Interpreter):
                 self.interpret(tree.children[3])
         return None
 
-    def DefRelease(self, tree):
+    @staticmethod
+    def DefRelease(tree):
         return None
 
     def DefReturn(self, tree):
@@ -379,7 +414,8 @@ class ConcreteInterpreter(Interpreter):
         raise MethodReturn()
         return None
 
-    def DefSignal(self, tree):
+    @staticmethod
+    def DefSignal(tree):
         # Skip
         return None
 
@@ -418,15 +454,16 @@ class ConcreteInterpreter(Interpreter):
                 target.set(res)
         return res
 
-    def DefAcquire(self, tree):
+    @staticmethod
+    def DefAcquire(tree):
         # Pretend that the mutex is acquired
         return Integer(0x1)
 
     def DefAdd(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: x + y)
+        return self.__eval_binary_op(tree, lambda x, y: x + y)
 
     def DefAnd(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: x & y)
+        return self.__eval_binary_op(tree, lambda x, y: x & y)
 
     def DefBuffer(self, tree):
         size = self.interpret(tree.children[1]).get()
@@ -502,7 +539,9 @@ class ConcreteInterpreter(Interpreter):
         if isinstance(ref, ObjectReference):
             return ref.get()
         else:
-            logging.warn(f"Attempt to dereference an object of type {ref.__class__.__name__}")
+            logging.warn(
+                f"Attempt to dereference an object of type {ref.__class__.__name__}"
+            )
             return ref
 
     def DefDivide(self, tree):
@@ -534,25 +573,26 @@ class ConcreteInterpreter(Interpreter):
         return ret
 
     def DefLAnd(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: 1 if x and y else 0)
+        return self.__eval_binary_op(tree, lambda x, y: 1 if x and y else 0)
 
     def DefLEqual(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: x == y)
+        return self.__eval_binary_op(tree, lambda x, y: x == y)
 
     def DefLGreater(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: x > y)
+        return self.__eval_binary_op(tree, lambda x, y: x > y)
 
     def DefLLess(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: x < y)
+        return self.__eval_binary_op(tree, lambda x, y: x < y)
 
     def DefLNot(self, tree):
         operand = self.interpret(tree.children[0]).get()
         return Integer(1 if not operand else 0)
 
     def DefLOr(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: 1 if x or y else 0)
+        return self.__eval_binary_op(tree, lambda x, y: 1 if x or y else 0)
 
-    def __match(self, op, obj, match_obj):
+    @staticmethod
+    def __match(op, obj, match_obj):
         try:
             if isinstance(match_obj, String):
                 return op(obj.to_string().get(), match_obj.get())
@@ -565,12 +605,12 @@ class ConcreteInterpreter(Interpreter):
             return False
 
     match_ops = {
-        0: lambda x,y: True,    # TRUE
-        1: lambda x,y: x == y,  # EQ
-        2: lambda x,y: x <= y,  # LE
-        3: lambda x,y: x < y,   # LT
-        4: lambda x,y: x >= y,  # GE
-        5: lambda x,y: x > y,   # GT
+        0: lambda x, y: True,  # TRUE
+        1: lambda x, y: x == y,  # EQ
+        2: lambda x, y: x <= y,  # LE
+        3: lambda x, y: x < y,  # LT
+        4: lambda x, y: x >= y,  # GE
+        5: lambda x, y: x > y,  # GT
     }
 
     def DefMatch(self, tree):
@@ -583,21 +623,24 @@ class ConcreteInterpreter(Interpreter):
         if isinstance(pkg, Package) and isinstance(start_index, int):
             for i in range(start_index, len(pkg.elements)):
                 obj = pkg.elements[i]
-                if self.__match(op1, obj, match_obj1) and self.__match(op2, obj, match_obj2):
+                if self.__match(op1, obj, match_obj1) and self.__match(
+                    op2, obj, match_obj2
+                ):
                     return Integer(i)
-        return Integer(0xffffffffffffffff) # Ones is 64-bit in DSDT rev 2 and above
+        # Ones is 64-bit in DSDT rev 2 and above
+        return Integer(0xFFFFFFFFFFFFFFFF)
 
     def DefMod(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: x % y)
+        return self.__eval_binary_op(tree, lambda x, y: x % y)
 
     def DefMultiply(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: x * y)
+        return self.__eval_binary_op(tree, lambda x, y: x * y)
 
     def DefNAnd(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: ~(x & y))
+        return self.__eval_binary_op(tree, lambda x, y: ~(x & y))
 
     def DefNOr(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: ~(x | y))
+        return self.__eval_binary_op(tree, lambda x, y: ~(x | y))
 
     def DefNot(self, tree):
         operand = self.interpret(tree.children[0])
@@ -608,10 +651,11 @@ class ConcreteInterpreter(Interpreter):
         return ret
 
     def DefOr(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: x | y)
+        return self.__eval_binary_op(tree, lambda x, y: x | y)
 
     def DefPackage(self, tree):
-        elements = list(map(lambda x: self.interpret(x), tree.children[2].children))
+        elements = list(map(lambda x: self.interpret(x),
+                        tree.children[2].children))
         return Package(elements)
 
     def DefRefOf(self, tree):
@@ -619,10 +663,10 @@ class ConcreteInterpreter(Interpreter):
         return ObjectReference(obj)
 
     def DefShiftLeft(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: x << y)
+        return self.__eval_binary_op(tree, lambda x, y: x << y)
 
     def DefShiftRight(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: x >> y)
+        return self.__eval_binary_op(tree, lambda x, y: x >> y)
 
     def DefSizeOf(self, tree):
         obj = self.interpret(tree.SuperName)
@@ -635,7 +679,9 @@ class ConcreteInterpreter(Interpreter):
             return Integer(len(obj.get()))
         elif isinstance(obj, Package):
             return Integer(len(obj.elements))
-        raise NotImplementedError(f"Cannot calculate the size of object of type {obj.__class__.__name__}")
+        raise NotImplementedError(
+            f"Cannot calculate the size of object of type {obj.__class__.__name__}"
+        )
 
     def DefStore(self, tree):
         obj = self.interpret(tree.children[0])
@@ -644,7 +690,7 @@ class ConcreteInterpreter(Interpreter):
         return None
 
     def DefSubtract(self, tree):
-        return self.__eval_binary_op(tree, lambda x,y: x - y)
+        return self.__eval_binary_op(tree, lambda x, y: x - y)
 
     def DefToHexString(self, tree):
         operand = self.interpret(tree.children[0])
