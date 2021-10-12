@@ -8,6 +8,7 @@ from copy import copy
 
 from . import grammar
 
+
 class Tree:
     def __init__(self, label=None, children=None):
         if children is None:
@@ -47,10 +48,12 @@ class Tree:
                     setattr(self, elem, self.children[i])
                     i += 1
 
+
 class Direction(Enum):
     TOPDOWN = 1
     BOTTOMUP = 2
     CUSTOMIZED = 3
+
 
 class Visitor:
     def __init__(self, direction):
@@ -89,6 +92,7 @@ class Visitor:
     def visit(self, tree):
         raise NotImplementedError
 
+
 class Transformer:
     def __init__(self, direction):
         self.depth = 0
@@ -126,6 +130,7 @@ class Transformer:
     def transform(self, tree):
         raise NotImplementedError
 
+
 class Interpreter:
     def __init__(self, context):
         self.context = context
@@ -138,4 +143,6 @@ class Interpreter:
         if fn:
             return fn(expr)
         else:
-            raise NotImplementedError(f"don't know how to interpret a tree node with label {expr.label}")
+            raise NotImplementedError(
+                f"don't know how to interpret a tree node with label {expr.label}"
+            )
