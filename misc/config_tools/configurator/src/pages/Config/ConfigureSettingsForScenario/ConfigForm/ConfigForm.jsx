@@ -70,6 +70,11 @@ export class ConfigForm extends Component {
                             items: {
                                 IVSHMEM_VMS: {
                                     IVSHMEM_VM: {
+                                        "ui:style": {
+                                            border: "1px solid gray",
+                                            padding: "1rem",
+                                            borderRadius: "7px"
+                                        },
                                         items: {
                                             VM_NAME: {
                                                 "ui:grid": 7,

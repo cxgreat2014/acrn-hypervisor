@@ -140,7 +140,7 @@ const FieldTemplate = (
             required={required}
             schema={schema}
         >
-            <Form.Group>
+            <Form.Group style={uiSchema.hasOwnProperty('ui:style') ? uiSchema['ui:style'] : {}}>
                 {descWithChildren}
                 {rawErrors.length > 0 && (
                     <ListGroup as="ul" className={descLabel ? (dlva ? 'ps-4' : ' col-8 offset-4') : ''}>
