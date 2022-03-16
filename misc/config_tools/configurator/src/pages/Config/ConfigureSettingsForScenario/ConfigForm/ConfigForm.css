@@ -4,3 +4,6 @@
     box-sizing: border-box;
     border-radius: 5px;
 }
+.object-property-expand{
+    display: none;
+}
