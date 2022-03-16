@@ -95,7 +95,7 @@ class RSTNormalizer:
             def re_sub(match):
                 key = match.group(1)
                 if self.data is None or json_key not in self.data or key not in self.data[json_key]:
-                    return self.url(key, {'title': '', 'url': f'search.html?q={key}&check_keywords=yes&area=default'})
+                    return self.url(key, {'title': '', 'link': f'search.html?q={key}&check_keywords=yes&area=default'})
                 return self.url(key, self.data[json_key][key])
 
             return re.sub(f':{rest_key}:' + r'`(.+?)`', re_sub, rest_text)
@@ -131,7 +131,10 @@ class ACRNDocumentStringConvertor:
         soup = BeautifulSoup(html, 'lxml')
         for link in soup.select('a'):
             link['target'] = '_blank'
-        fragment = soup.select_one('div.document').prettify()
+        try:
+            fragment = soup.select_one('div.document').prettify()
+        except:
+            fragment = '\n'.join([str(x) for x in soup.select_one('main').children]).strip()
         return fragment
 
 
