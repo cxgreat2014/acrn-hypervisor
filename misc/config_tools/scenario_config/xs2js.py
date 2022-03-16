@@ -5,7 +5,7 @@ from collections import OrderedDict
 from pathlib import Path
 
 import xmltodict
-from library.document import ACRNDocumentStringConvertor
+from document import ACRNDocumentStringConvertor
 
 
 class XSTypes:

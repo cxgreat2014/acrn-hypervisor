@@ -1,4 +1,4 @@
-import xs2js from '../../xs2js/xs2js.py'
+
 import {loadPyodide} from "./pyodide/pyodide.mjs"
 import requirements from '../../requirements.txt'
 
@@ -58,20 +58,7 @@ function loadLibrary(libraryName, content) {
     return writeFile(`/lib/python3.9/${libraryName}.py`, content)
 }
 
-function convertXSD(xsdContent) {
-    writeFile('schema.xsd', xsdContent)
-    loadLibrary('xs2js', xs2js)
-    console.log('ws')
-    return runPyCode(`import json
-from xs2js import XS2JS
-schema_file = 'schema.xsd'
-json_schema = XS2JS(schema_file).get_json_schema()
-json_schema = json.dumps(json_schema, indent='\\t')
-json_schema
-`)
-}
-
 function validateXML(){
 
 }
-export {initPyodide, runPyCode, readFile, writeFile, convertXSD}
+export {initPyodide, runPyCode, readFile, writeFile}

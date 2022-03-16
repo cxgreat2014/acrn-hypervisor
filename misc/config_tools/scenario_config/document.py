@@ -1,5 +1,6 @@
 """
-In js side
+This program support run in pyodide env.
+In js side you can pass params by add follow code before this script.
 ```js
 params = "${Base64.encode(params)}"
 ```
@@ -32,7 +33,7 @@ class RSTNormalizer:
         self.url_base = url_base
 
         if isinstance(objects_inv, dict):
-            # already parse data
+            # parsed data
             self.data = objects_inv
         elif isinstance(objects_inv, str):
             self.data = self.__convert_inv(objects_inv)
@@ -58,7 +59,16 @@ class RSTNormalizer:
             def warn(self, msg: str) -> None:
                 print(msg, file=sys.stderr)
 
-        filename = url
+        try:
+            inv_data = RSTNormalizer.__prase_inv_file(url)
+        except Exception as e:
+            print(e)
+            print('Download inv data failed, document link will link to search page.')
+            inv_data = None
+        return inv_data
+
+    @staticmethod
+    def __prase_inv_file(filename):
         invdata = fetch_inventory(MockApp(), '', filename)  # type: ignore
         result = {}
         for key in sorted(invdata or {}):
@@ -84,9 +94,9 @@ class RSTNormalizer:
         def handel_role(rest_text):
             def re_sub(match):
                 key = match.group(1)
-                if key in self.data[json_key]:
-                    return self.url(key, self.data[json_key][key])
-                raise NotImplementedError
+                if self.data is None or json_key not in self.data or key not in self.data[json_key]:
+                    return self.url(key, {'title': '', 'url': f'search.html?q={key}&check_keywords=yes&area=default'})
+                return self.url(key, self.data[json_key][key])
 
             return re.sub(f':{rest_key}:' + r'`(.+?)`', re_sub, rest_text)
 
@@ -130,6 +140,7 @@ if __name__ == '__main__':
     WEB = False
     if 'params' in locals():
         WEB = True
+        # noinspection PyUnboundLocalVariable
         params_data = base64.b64decode(params)
         params = json.loads(params_data)
     else:

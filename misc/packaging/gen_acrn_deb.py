@@ -187,18 +187,16 @@ def create_configurator_deb(build_dir):
     # get folder path
     project_base = Path(__file__).parent.parent.parent
     configurator_path = Path(__file__).parent.parent / 'config_tools' / 'configurator'
+    scenario_config_path = project_base / "misc" / "config_tools" / "scenario_config"
     deb_dir = configurator_path / 'src-tauri' / 'target' / 'release' / 'bundle' / 'deb'
 
     # clean old directory
     if os.path.isdir(deb_dir):
         shutil.rmtree(deb_dir)
 
-    # install dependency
-    add_cmd_list(cmd_list, 'python3 -m pip install -r requirements.txt', configurator_path)
-    add_cmd_list(cmd_list, 'yarn', configurator_path)
-    # build
-    add_cmd_list(cmd_list, 'python3 schema_slicer.py', project_base / "misc" / "config_tools" / "scenario_config")
-    add_cmd_list(cmd_list, 'python3 xs2js.py', project_base / "misc" / "config_tools" / "configurator" / "xs2js")
+    # build command, if you update this, please update misc/config_tools/configurator/README.md#L55
+    add_cmd_list(cmd_list, 'python3 schema_slicer.py', scenario_config_path)
+    add_cmd_list(cmd_list, 'python3 xs2js.py', scenario_config_path)
     add_cmd_list(cmd_list, 'yarn build', configurator_path)
     run_cmd_list(cmd_list)
 

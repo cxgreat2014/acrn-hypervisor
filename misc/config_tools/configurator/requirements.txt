@@ -2,3 +2,6 @@ lxml
 xmltodict
 xmlschema
 defusedxml
+requests
+bs4
+sphinx
