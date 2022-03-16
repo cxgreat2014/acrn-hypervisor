@@ -271,6 +271,7 @@ export class ProgramLayer extends EventBase {
         // call by view
         let scenarioConfig = await this.xmlLayer.loadScenario(scenarioXMLPath)
         this.initScenario()
+        this.scenarioData.hv = scenarioConfig.hv;
         scenarioConfig.vm.map((vmConfig) => {
             let vmType = vmConfig.hidden.load_order
             if (!this.scenarioData.vm.hasOwnProperty(vmType)) {
