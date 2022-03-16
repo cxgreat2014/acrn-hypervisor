@@ -70,10 +70,10 @@ const DefaultArrayItem = (props: any) => {
     };
     return (
         <div key={props.key}>
-            <Row className="mb-2  d-flex align-items-center">
+            <Row className="mb-2  d-flex align-items-baseline">
                 <Col xs="9" lg="9">{props.children}</Col>
 
-                <Col xs="3" lg="3" className="py-4">
+                <Col xs="3" lg="3" className="px-3">
                     {props.hasToolbar && (
                         <div className="d-flex flex-row">
                             {(props.hasMoveUp || props.hasMoveDown) && (

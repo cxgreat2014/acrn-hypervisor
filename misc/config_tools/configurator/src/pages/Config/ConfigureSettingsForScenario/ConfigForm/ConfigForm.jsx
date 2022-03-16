@@ -1,7 +1,8 @@
 import React, {Component} from "react"
 import Form from "../../../../lib/bs4rjsf"
-import {IVSHMEM_VM} from "./IVSHMEM_VM/IVSHMEM_VM";
 import {ACRNContext} from "../../../../ACRNContext";
+import SelectWidget from "./IVSHMEM_VM/SelectWidget";
+import TextWidget from "./IVSHMEM_VM/TextWidget";
 
 // import CustomTemplateField from "./CustomTemplateField/CustomTemplateField";
 
@@ -70,8 +71,18 @@ export class ConfigForm extends Component {
                                 IVSHMEM_VMS: {
                                     IVSHMEM_VM: {
                                         items: {
-                                            VM_NAME: {"ui:grid": 6},
-                                            VBDF: {"ui:grid": 6}
+                                            VM_NAME: {
+                                                "ui:grid": 7,
+                                                "ui:widget": 'VM_NAME',
+                                                "ui:descLabel": true,
+                                                "ui:descLabelAli": 'H',
+                                            },
+                                            VBDF: {
+                                                "ui:grid": 5,
+                                                "ui:widget": 'VBDF',
+                                                "ui:descLabel": true,
+                                                "ui:descLabelAli": 'V',
+                                            }
                                         }
                                     }
                                 }
@@ -85,8 +96,9 @@ export class ConfigForm extends Component {
             }
         }
 
-        let fields = {
-            IVSHMEM_VM: IVSHMEM_VM
+        let widgets = {
+            VM_NAME: SelectWidget,
+            VBDF: TextWidget
         }
 
 
@@ -96,7 +108,7 @@ export class ConfigForm extends Component {
                 liveValidate={true}
                 schema={params.schema}
                 uiSchema={uiSchema}
-                fields={fields}
+                widgets={widgets}
                 formData={params.formData}
                 onChange={(e) => {
                     let data = e.formData

@@ -6,11 +6,11 @@ import Form from "react-bootstrap/Form";
 import ListGroup from "react-bootstrap/ListGroup";
 
 import WrapIfAdditional from "./WrapIfAdditional";
-// @ts-ignore
-// import rst2html from "rst2html"
+
 import {OverlayTrigger, Popover} from "react-bootstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCircleExclamation} from "@fortawesome/free-solid-svg-icons";
+import _ from "lodash";
 
 const FieldTemplate = (
     {
@@ -27,15 +27,74 @@ const FieldTemplate = (
         onKeyChange,
         readonly,
         required,
-        schema
+        schema,
+        uiSchema
     }: FieldTemplateProps) => {
 
-
+    let descLabel = (uiSchema.hasOwnProperty("ui:descLabel") && uiSchema["ui:descLabel"] === true)
     let descWithChildren
-
+    let isFirst = _.endsWith(id, 'IVSHMEM_VM_0_VBDF') || _.endsWith(id, 'IVSHMEM_VM_0_VM_NAME')
+    let dlva = uiSchema.hasOwnProperty("ui:descLabelAli") && uiSchema["ui:descLabelAli"] === 'V'
     if (displayLabel && rawDescription) {
-        descWithChildren = <div className="d-flex">
-            <OverlayTrigger
+        let desc
+        if (descLabel) {
+            if (dlva) {
+                desc = <OverlayTrigger
+                    trigger={["hover", "focus"]}
+                    key="top"
+                    placement="top"
+                    overlay={
+                        <Popover id={`popover-positioned-top`}>
+                            <Popover.Body>
+                                <Form.Text className={rawErrors.length > 0 ? "text-danger" : "text-muted"}
+                                           dangerouslySetInnerHTML={{__html: rawDescription}}/>
+                            </Popover.Body>
+                        </Popover>
+                    }>
+                    <div className="mx-2 py-2 row">
+                        <Form.Label
+                            className={(isFirst ? 'col-12 ps-4' : 'd-none') + " col-form-label " + (rawErrors.length > 0 ? "text-danger" : "")}>
+                            {uiSchema["ui:title"] || schema.title || label}
+                            {(label || uiSchema["ui:title"] || schema.title) && required ? "*" : null}
+                        </Form.Label>
+                    </div>
+                </OverlayTrigger>
+                descWithChildren = <div className="row">
+                    {desc}
+                    <div className="col-12">
+                        {children}
+                    </div>
+                </div>
+            } else {
+                desc = <OverlayTrigger
+                    trigger={["hover", "focus"]}
+                    key="top"
+                    placement="top"
+                    overlay={
+                        <Popover id={`popover-positioned-top`}>
+                            <Popover.Body>
+                                <Form.Text className={rawErrors.length > 0 ? "text-danger" : "text-muted"}
+                                           dangerouslySetInnerHTML={{__html: rawDescription}}/>
+                            </Popover.Body>
+                        </Popover>
+                    }>
+                    <div className="col-4" style={{marginTop: '54px'}}>
+                        <Form.Label
+                            className={(isFirst ? 'col-12 ps-4' : 'd-none') + " col-form-label " + (rawErrors.length > 0 ? "text-danger" : "")}>
+                            {uiSchema["ui:title"] || schema.title || label}
+                            {(label || uiSchema["ui:title"] || schema.title) && required ? "*" : null}
+                        </Form.Label>
+                    </div>
+                </OverlayTrigger>
+                descWithChildren = <div className="row">
+                    {desc}
+                    <div className="col-8">
+                        {children}
+                    </div>
+                </div>
+            }
+        } else {
+            desc = <OverlayTrigger
                 trigger={["hover", "focus"]}
                 key="top"
                 placement="top"
@@ -54,10 +113,15 @@ const FieldTemplate = (
                     />
                 </div>
             </OverlayTrigger>
-            <div className="w-100">
-                {children}
+            descWithChildren = <div className="d-flex">
+                {desc}
+                <div className="w-100">
+                    {children}
+                </div>
             </div>
-        </div>
+        }
+
+
     } else {
         descWithChildren = children
     }
@@ -76,7 +140,7 @@ const FieldTemplate = (
             <Form.Group>
                 {descWithChildren}
                 {rawErrors.length > 0 && (
-                    <ListGroup as="ul">
+                    <ListGroup as="ul" className={descLabel ? (dlva ? 'ps-4' : ' col-8 offset-4') : ''}>
                         {rawErrors.map((error: string) => {
                             return (
                                 <ListGroup.Item as="li" key={error} className="border-0 m-0 p-0">
