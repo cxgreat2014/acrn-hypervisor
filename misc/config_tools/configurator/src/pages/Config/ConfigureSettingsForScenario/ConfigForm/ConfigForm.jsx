@@ -76,6 +76,7 @@ export class ConfigForm extends Component {
                                                 "ui:widget": 'VM_NAME',
                                                 "ui:descLabel": true,
                                                 "ui:descLabelAli": 'H',
+                                                "ui:descLabelMT": true
                                             },
                                             VBDF: {
                                                 "ui:grid": 5,
@@ -85,6 +86,28 @@ export class ConfigForm extends Component {
                                             }
                                         }
                                     }
+                                }
+                            }
+                        }
+                    }
+                },
+                vuart_connections: {
+                    vuart_connection: {
+                        items: {
+                            endpoint: {
+                                items: {
+                                    vm_name: {
+                                        "ui:grid": 6,
+                                        "ui:widget": 'VBDF',
+                                        "ui:descLabel": true,
+                                        "ui:descLabelAli": 'V',
+                                    },
+                                    io_port: {
+                                        "ui:grid": 6,
+                                        "ui:widget": 'VBDF',
+                                        "ui:descLabel": true,
+                                        "ui:descLabelAli": 'V',
+                                    },
                                 }
                             }
                         }

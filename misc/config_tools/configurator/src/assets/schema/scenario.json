@@ -509,11 +509,15 @@
 			],
 			"properties": {
 				"vm_name": {
-					"type": "string"
+					"type": "string",
+					"title": "Virtual UART port",
+					"description": "<p>Virtual UART port</p>"
 				},
 				"io_port": {
 					"$ref": "#/definitions/HexFormat",
-					"default": "0x3F"
+					"default": "0x3F",
+					"title": "Virtual I/O address",
+					"description": "<p>Virtual I/O address</p>"
 				},
 				"vbdf": {
 					"items": {

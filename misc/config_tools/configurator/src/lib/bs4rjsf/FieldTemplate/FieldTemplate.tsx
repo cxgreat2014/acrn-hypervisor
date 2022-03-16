@@ -33,7 +33,9 @@ const FieldTemplate = (
 
     let descLabel = (uiSchema.hasOwnProperty("ui:descLabel") && uiSchema["ui:descLabel"] === true)
     let descWithChildren
-    let isFirst = _.endsWith(id, 'IVSHMEM_VM_0_VBDF') || _.endsWith(id, 'IVSHMEM_VM_0_VM_NAME')
+    let showLabel = _.endsWith(id, 'IVSHMEM_VM_0_VBDF') || _.endsWith(id, 'IVSHMEM_VM_0_VM_NAME') || (
+        id.indexOf('vuart_connection') > 0 && (_.endsWith(id, 'vm_name') || _.endsWith(id, 'io_port'))
+    )
     let dlva = uiSchema.hasOwnProperty("ui:descLabelAli") && uiSchema["ui:descLabelAli"] === 'V'
     if (displayLabel && rawDescription) {
         let desc
@@ -53,7 +55,7 @@ const FieldTemplate = (
                     }>
                     <div className="mx-2 py-2 row">
                         <Form.Label
-                            className={(isFirst ? 'col-12 ps-4' : 'd-none') + " col-form-label " + (rawErrors.length > 0 ? "text-danger" : "")}>
+                            className={(showLabel ? 'col-12 ps-4' : 'd-none') + " col-form-label " + (rawErrors.length > 0 ? "text-danger" : "")}>
                             {uiSchema["ui:title"] || schema.title || label}
                             {(label || uiSchema["ui:title"] || schema.title) && required ? "*" : null}
                         </Form.Label>
@@ -78,9 +80,10 @@ const FieldTemplate = (
                             </Popover.Body>
                         </Popover>
                     }>
-                    <div className="col-4" style={{marginTop: '54px'}}>
+                    <div className="col-4"
+                         style={{marginTop: (uiSchema.hasOwnProperty("ui:descLabelMT") && uiSchema["ui:descLabelMT"] ? '54px' : 'auto')}}>
                         <Form.Label
-                            className={(isFirst ? 'col-12 ps-4' : 'd-none') + " col-form-label " + (rawErrors.length > 0 ? "text-danger" : "")}>
+                            className={(showLabel ? 'col-12 ps-4' : 'd-none') + " col-form-label " + (rawErrors.length > 0 ? "text-danger" : "")}>
                             {uiSchema["ui:title"] || schema.title || label}
                             {(label || uiSchema["ui:title"] || schema.title) && required ? "*" : null}
                         </Form.Label>
