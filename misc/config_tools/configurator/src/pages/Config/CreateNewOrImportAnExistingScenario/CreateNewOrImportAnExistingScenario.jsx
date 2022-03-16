@@ -12,7 +12,11 @@ export default class CreateNewOrImportAnExistingScenario extends Component {
         this.scenarioXMLSelect = React.createRef()
         this.scenarioXMLFileInput = React.createRef()
         this.state = {
-            scenarioConfigFiles: [], stage: props.stage, scenarioName: '', scenarioConfig: {}
+            scenarioConfigFiles: [],
+            stage: props.stage,
+            scenarioName: '',
+            scenarioConfig: {},
+            selected: null
         }
     }
 
@@ -45,13 +49,16 @@ export default class CreateNewOrImportAnExistingScenario extends Component {
     importScenario = () => {
         let {configurator} = this.context
         configurator.programLayer.loadScenario(this.scenarioXMLSelect.current.value)
+            .then(() => {
+                this.setState({selected: configurator.WorkingFolder + '/scenario.xml'})
+            })
             .catch((reason) => {
                 console.log(reason)
                 alert(reason)
             })
     };
 
-    render() {
+    render = () => {
         let scenarioHistorySelect = this.state.scenarioConfigFiles.map((optionValue, index) => {
             return (<option key={index} value={optionValue}>{optionValue}</option>)
         })
@@ -65,10 +72,12 @@ export default class CreateNewOrImportAnExistingScenario extends Component {
                 <Accordion.Body>
                     <Row className="px-3 py-2">
                         <Col className="border-end-sm py-1" sm>
-                            <p className="py-2 d-none" style={{"letterSpacing": "0.49px"}}>Current scenario:
-                                MySharedScenario.xml</p>
+                            <p className="py-2" style={{"letterSpacing": "0.49px"}}>Current scenario:
+                                {this.state.selected ? this.state.selected : "none selected"}</p>
                             <div className="py-4 text-center">
-                                <CreateScenarioModal/>
+                                <CreateScenarioModal cb={() => {
+                                    this.setState({selected: configurator.WorkingFolder + '/scenario.xml'})
+                                }}/>
                             </div>
                         </Col>
 

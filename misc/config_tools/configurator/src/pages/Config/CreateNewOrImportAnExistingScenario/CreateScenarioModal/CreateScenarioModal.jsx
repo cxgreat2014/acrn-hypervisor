@@ -31,6 +31,7 @@ export default class CreateScenarioModal extends Component {
         let {configurator} = this.context
 
         configurator.programLayer.newScenario(vmNum.PRE_LAUNCHED_VM, vmNum.SERVICE_VM, vmNum.POST_LAUNCHED_VM)
+        this.props.cb()
         this.setState({show: false})
     }
 
