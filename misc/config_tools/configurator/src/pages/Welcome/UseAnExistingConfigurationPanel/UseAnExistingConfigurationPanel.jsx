@@ -1,7 +1,6 @@
 import {useNavigate} from "react-router";
 import React from "react";
 import {Button, Form} from "react-bootstrap";
-import {buildPageParams, unique} from "../../../lib/common";
 import {dialog} from "@tauri-apps/api";
 import {ACRNContext} from "../../../ACRNContext";
 
@@ -47,8 +46,8 @@ class UseAnExistingConfigurationPanel extends React.Component {
     nextPage = (WorkingFolder) => {
         let {configurator} = this.context
         this.addRecentDir(WorkingFolder).then(() => {
-            configurator.settingWorkingFolder(WorkingFolder)
-            this.navigate({pathname: './config'});
+            let params = configurator.settingWorkingFolder(WorkingFolder)
+            this.navigate(params);
         })
     }
 

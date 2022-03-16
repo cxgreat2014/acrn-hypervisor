@@ -3,6 +3,7 @@ import _ from "lodash";
 import React, {Component} from "react";
 import {path} from "@tauri-apps/api";
 import scenario from '../assets/schema/scenario.json'
+import {createSearchParams} from "react-router-dom";
 
 
 function ThrowError(errMsg) {
@@ -256,13 +257,13 @@ export class ProgramLayer extends EventBase {
         const boardFileWritePath = await path.join(await this.helper.resolveHome(WorkingFolder), newBoardFileName)
 
         // remove current working folder old Board File first
-        await this.removeOldBoardFile()
+        await this.removeOldBoardFile(WorkingFolder)
 
         // save board file to working director
         this.xmlLayer.saveBoard(boardFileWritePath, boardXMLText)
-
         // get shownName
         let shownName = await path.join(WorkingFolder, newBoardFileName)
+        console.log({shownName, boardXMLText, PCIDevices})
         return {shownName, boardXMLText, PCIDevices}
     }
 
@@ -319,7 +320,7 @@ export class Configurator extends EventBase {
     constructor(helper) {
         super()
 
-        this.WorkingFolder = ''
+        this.WorkingFolder = this.#getURLParam('WorkingFolder')
 
         this.helper = helper
         this.XMLLayer = new XMLLayer(this.helper)
@@ -332,8 +333,23 @@ export class Configurator extends EventBase {
         this.updateSchema()
     }
 
+    #getURLParam(key) {
+        let urlPattern = new URLPattern(location.hash.substring(1), location.origin)
+        const searchParams = new URLSearchParams(urlPattern.search)
+        return searchParams.get(key);
+    }
+
+    #buildPageParams(url, queryParams = {}) {
+        let data = {pathname: url}
+        if (queryParams) {
+            data.search = createSearchParams(queryParams).toString()
+        }
+        return data;
+    }
+
     settingWorkingFolder = (WorkingFolder) => {
         this.WorkingFolder = WorkingFolder
+        return this.#buildPageParams('./config', {WorkingFolder})
     }
 
     updateSchema = () => {

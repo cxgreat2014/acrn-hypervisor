@@ -2,8 +2,6 @@ import React from "react";
 import {useNavigate} from "react-router";
 import {Button, Form} from "react-bootstrap";
 
-import {buildPageParams} from "../../../lib/common";
-
 import Confirm from "../../../components/Confirm/Confirm";
 import {dialog, fs} from "@tauri-apps/api";
 import {ACRNContext} from "../../../ACRNContext";
@@ -28,8 +26,8 @@ class StartNewConfigurationPanel extends React.Component {
         this.addRecentDir(WorkingFolder)
             .then(() => {
                 let {configurator} = this.context;
-                configurator.settingWorkingFolder(WorkingFolder)
-                this.navigate({pathname: './config'});
+                let params = configurator.settingWorkingFolder(WorkingFolder)
+                this.navigate(params);
             })
     }
 
