@@ -236,7 +236,7 @@ export class ProgramLayer extends EventBase {
         this.onScenarioDataUpdateEvent()
     }
 
-    loadBoard = async (boardXMLPath) => {
+    loadBoard = async (WorkingFolder, boardXMLPath) => {
         // call by view
         let {boardXMLText, PCIDevices} = await this.xmlLayer.loadBoard(boardXMLPath)
 
@@ -290,8 +290,8 @@ export class ProgramLayer extends EventBase {
         return originScenario
     }
 
-    async removeOldBoardFile() {
-        let files = await this.helper.list(await this.helper.resolveHome(window.WorkingFolder))
+    async removeOldBoardFile(WorkingFolder) {
+        let files = await this.helper.list(await this.helper.resolveHome(WorkingFolder))
         files.map((filename) => {
             if (_.endsWith(filename, '.board.xml')) {
                 this.helper.remove(filename)
@@ -300,11 +300,11 @@ export class ProgramLayer extends EventBase {
     }
 
 
-    saveScenario = async () => {
+    saveScenario = async (WorkingFolder) => {
         // call by view
         let originScenarioData = this.getOriginScenarioData()
         let filename = 'scenario.xml'
-        let scenarioWritePath = await path.join(await this.helper.resolveHome(window.WorkingFolder), filename)
+        let scenarioWritePath = await path.join(await this.helper.resolveHome(WorkingFolder), filename)
         this.xmlLayer.saveScenario(scenarioWritePath, originScenarioData)
         // noinspection UnnecessaryLocalVariableJS
         let shownPath = await path.join(WorkingFolder, filename)
@@ -318,6 +318,9 @@ export class Configurator extends EventBase {
     // convert it to view data
     constructor(helper) {
         super()
+
+        this.WorkingFolder = ''
+
         this.helper = helper
         this.XMLLayer = new XMLLayer(this.helper)
         this.programLayer = new ProgramLayer(this.helper, this.XMLLayer)
@@ -327,6 +330,10 @@ export class Configurator extends EventBase {
         delete this.vmSchemas.HV
 
         this.updateSchema()
+    }
+
+    settingWorkingFolder = (WorkingFolder) => {
+        this.WorkingFolder = WorkingFolder
     }
 
     updateSchema = () => {
@@ -350,7 +357,7 @@ export class Configurator extends EventBase {
 
 
     loadBoard = async (boardXMLPath, callback) => {
-        let {shownName, boardXMLText, PCIDevices} = await this.programLayer.loadBoard(boardXMLPath)
+        let {shownName, boardXMLText, PCIDevices} = await this.programLayer.loadBoard(this.WorkingFolder, boardXMLPath)
         scenario.definitions.PCIDevsConfiguration.properties.pci_dev.items.enum = PCIDevices
         Object.keys(this.vmSchemas).map((VMTypeKey) => {
             Object.keys(this.vmSchemas[VMTypeKey]).map((configLevelKey) => {
@@ -376,7 +383,7 @@ export class Configurator extends EventBase {
 
 
     saveScenario = () => {
-        let shownPath = this.programLayer.saveScenario()
+        let shownPath = this.programLayer.saveScenario(this.WorkingFolder)
         return this.addHistory('scenario', shownPath)
     }
 
@@ -420,5 +427,3 @@ export class Configurator extends EventBase {
         this.helper.log(...arguments)
     }
 }
-
-

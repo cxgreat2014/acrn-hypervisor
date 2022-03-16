@@ -45,9 +45,9 @@ class UseAnExistingConfigurationPanel extends React.Component {
     }
 
     nextPage = (WorkingFolder) => {
+        let {configurator} = this.context
         this.addRecentDir(WorkingFolder).then(() => {
-            let {settingWorkingFolder} = this.context
-            settingWorkingFolder(WorkingFolder)
+            configurator.settingWorkingFolder(WorkingFolder)
             this.navigate({pathname: './config'});
         })
     }

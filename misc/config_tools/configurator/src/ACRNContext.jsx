@@ -6,9 +6,7 @@ import {Configurator} from "./lib/acrn";
 // 1. 使用 createContext 创建上下文
 export const ACRNContext = createContext({
     config: ACRNConfig,
-    WorkingFolder: '',
-    settingWorkingFolder: () => {
-    },
+
     helper: () => {
     },
     configurator: () => {
@@ -24,19 +22,10 @@ export class ACRNProvider extends React.Component {
         let configurator = new Configurator(helper)
         this.state = {
             config: ACRNConfig,
-            WorkingFolder: '',
-            settingWorkingFolder: this.settingWorkingFolder,
             helper: helper,
             configurator: configurator
         }
     }
-
-    settingWorkingFolder = (WorkingFolder) => {
-        console.log('swf', WorkingFolder)
-        debugger
-        this.setState({WorkingFolder})
-    }
-
 
     render() {
         console.log(this.state)

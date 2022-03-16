@@ -19,10 +19,9 @@ import {ACRNContext} from "../../ACRNContext";
 class Config extends React.Component {
     constructor(props, context) {
         super(props);
-        let {WorkingFolder} = context
-        console.log("-------------", WorkingFolder)
+        let {configurator} = context
         this.state = {
-            WorkingFolder
+            WorkingFolder: configurator.WorkingFolder
         }
     }
 

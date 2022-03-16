@@ -11,7 +11,7 @@ export default class ExitACRNConfigurationModal extends Component {
     }
 
     render() {
-        let {configurator, WorkingFolder} = this.context
+        let {configurator} = this.context
 
         const handleClose = () => this.setState({show: false});
         const handleShow = (e) => {
@@ -31,7 +31,7 @@ export default class ExitACRNConfigurationModal extends Component {
                         <div className="p-4">
                             <b>ACRN Configuration files will be saved in the working folder:</b>
                             <p className="py-4 fs-4">
-                                {WorkingFolder}
+                                {configurator.WorkingFolder}
                             </p>
                         </div>
                     </Modal.Body>
