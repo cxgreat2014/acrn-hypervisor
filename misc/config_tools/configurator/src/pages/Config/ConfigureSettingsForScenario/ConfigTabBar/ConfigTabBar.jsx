@@ -3,6 +3,7 @@ import "./ConfigTabBar.css"
 import Tab from "./Tab";
 import TabSplitter from "./TabSplitter";
 import TabAdd from "./TabAdd";
+import {ACRNContext} from "../../../../ACRNContext";
 
 export default class ConfigTabBar extends Component {
     constructor(props) {
@@ -13,15 +14,17 @@ export default class ConfigTabBar extends Component {
     }
 
     componentDidMount = () => {
-        this.funRegisterID = acrnConfigurator.programLayer.register(
-            acrnConfigurator.eventName.scenarioDataUpdate, () => {
+        let {configurator} = this.context
+        this.funRegisterID = configurator.programLayer.register(
+            configurator.eventName.scenarioDataUpdate, () => {
                 this.forceUpdate()
             }
         )
     }
 
     componentWillUnmount = () => {
-        acrnConfigurator.programLayer.unregister(this.funRegisterID)
+        let {configurator} = this.context
+        configurator.programLayer.unregister(this.funRegisterID)
     }
 
     active = (activeVMID = null) => {
@@ -44,7 +47,8 @@ export default class ConfigTabBar extends Component {
 
 
     render = () => {
-        let scenarioData = acrnConfigurator.programLayer.scenarioData
+        let {configurator} = this.context
+        let scenarioData = configurator.programLayer.scenarioData
 
         let PRE_LAUNCHED_VM = scenarioData.vm.PRE_LAUNCHED_VM.map((vmConfig) => {
             return this.tab(vmConfig, 'Pre-Launched')
@@ -62,17 +66,18 @@ export default class ConfigTabBar extends Component {
                 <TabSplitter/>
                 {PRE_LAUNCHED_VM}
                 <TabAdd desc="Pre-launched VM" addVM={() => {
-                    acrnConfigurator.programLayer.addVM('PRE_LAUNCHED_VM')
+                    configurator.programLayer.addVM('PRE_LAUNCHED_VM')
                 }}/>
                 {SERVICE_VM}
                 {POST_LAUNCHED_VM}
                 <TabAdd desc="Post-launched VM" addVM={() => {
                     if (scenarioData.vm.SERVICE_VM.length === 0) {
-                        acrnConfigurator.programLayer.addVM('SERVICE_VM')
+                        configurator.programLayer.addVM('SERVICE_VM')
                     }
-                    acrnConfigurator.programLayer.addVM('POST_LAUNCHED_VM')
+                    configurator.programLayer.addVM('POST_LAUNCHED_VM')
                 }}/>
             </div>
         )
     }
 }
+ConfigTabBar.contextType = ACRNContext

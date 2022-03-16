@@ -8,6 +8,8 @@ import {fs, path} from "@tauri-apps/api"
 // noinspection JSUnresolvedFunction,JSUnresolvedVariable
 class BackendBase {
     listConfig = async () => {
+        await this.init
+
         let config = await this.read(this.configPath)
         if (config == null) {
             return {}
@@ -22,6 +24,7 @@ class BackendBase {
 
     getConfig = async (key, defaultValue) => {
         let config = await this.listConfig()
+        console.log(key, config, defaultValue)
         if (config.hasOwnProperty(key)) {
             return config[key]
         }
@@ -106,10 +109,11 @@ export class TauriLocalFSBackend extends BackendBase {
         this.init = path.homeDir()
             .then(async (dirPath) => {
                 this.configDir = await path.join(dirPath, '.acrn-configurator')
-                this.configPath = await path.join(dirPath, 'config.json')
+                this.configPath = await path.join(this.configDir, 'config.json')
                 return fs.readDir(this.configDir)
                     .catch(async () => {
                         fs.createDir(this.configDir, {recursive: true})
+                            .then(() => this.write(this.configPath, "{}"))
                             .catch((reason) => {
                                 alert("Create config dir failed. Error:" + reason)
                             })
@@ -120,7 +124,12 @@ export class TauriLocalFSBackend extends BackendBase {
 
     read = async (filePath) => {
         await this.init
-        return await fs.readTextFile(filePath).catch((reason => alert("Read file error! Error: " + reason)))
+        return await fs.readTextFile(filePath)
+            .catch(reason => {
+                // Todo: add isFile function to check perm
+                // alert("Read file error! Error: " + reason);
+                return null
+            })
     }
 
     write = async (filePath, value) => {
@@ -162,6 +171,13 @@ export class Helper {
             "padding: 1px; border-radius: 3px 0 0 3px; color: #fff; background: ".concat(this.color.deepGray, ";"),
             "padding: 1px; border-radius: 0 3px 3px 0; color: #fff; background: ".concat(backgroundColor, ";")
         )
+    }
+
+    resolveHome = async (filepath) => {
+        if (filepath[0] === '~') {
+            return await path.join(await path.homeDir(), filepath.slice(1))
+        }
+        return filepath;
     }
 
     convertXMLTextToObj = (XMLText) => {

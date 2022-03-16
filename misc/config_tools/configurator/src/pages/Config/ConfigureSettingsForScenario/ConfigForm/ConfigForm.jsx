@@ -1,6 +1,7 @@
 import React, {Component} from "react"
 import Form from "../../../../lib/bs4rjsf"
 import {IVSHMEM_VM} from "./IVSHMEM_VM/IVSHMEM_VM";
+import {ACRNContext} from "../../../../ACRNContext";
 
 // import CustomTemplateField from "./CustomTemplateField/CustomTemplateField";
 
@@ -10,16 +11,17 @@ export class ConfigForm extends Component {
     }
 
     setFormData = (data) => {
+        let {configurator} = this.context
         let VMID = data['VMID']
         let mode = data['mode']
 
         if (VMID === -1) {
-            acrnConfigurator.programLayer.scenarioData.hv[mode] = data[mode]
+            configurator.programLayer.scenarioData.hv[mode] = data[mode]
             return
         }
 
         let load_order = data['load_order']
-        acrnConfigurator.programLayer.scenarioData.vm[load_order].map((vmConfig) => {
+        configurator.programLayer.scenarioData.vm[load_order].map((vmConfig) => {
             if (vmConfig['@id'] === VMID) {
                 vmConfig[mode] = data[mode]
             }
@@ -28,18 +30,19 @@ export class ConfigForm extends Component {
 
 
     getParams = (VMID, mode) => {
+        let {configurator} = this.context
         let schema, formData = {VMID, mode};
         if (VMID === -1) {
-            schema = acrnConfigurator.hvSchema[mode]
-            formData[mode] = acrnConfigurator.programLayer.scenarioData.hv[mode]
+            schema = configurator.hvSchema[mode]
+            formData[mode] = configurator.programLayer.scenarioData.hv[mode]
         } else {
             let VMData = null;
-            acrnConfigurator.programLayer.getOriginScenarioData().vm.map((vmConfig) => {
+            configurator.programLayer.getOriginScenarioData().vm.map((vmConfig) => {
                 if (vmConfig['@id'] === VMID) {
                     VMData = vmConfig
                 }
             })
-            schema = acrnConfigurator.vmSchemas[VMData.hidden.load_order][mode]
+            schema = configurator.vmSchemas[VMData.hidden.load_order][mode]
             formData[mode] = VMData[mode]
             formData['load_order'] = VMData.hidden.load_order
         }
@@ -103,3 +106,5 @@ export class ConfigForm extends Component {
         </div>
     }
 }
+
+ConfigForm.contextType = ACRNContext

@@ -1,7 +1,8 @@
 import React, {Component} from "react";
-import {Button, Col, Form, Row} from "react-bootstrap";
+import {Accordion, Button, Col, Form, Row} from "react-bootstrap";
 import Banner from "../../../components/Banner";
 import {dialog} from "@tauri-apps/api";
+import {ACRNContext} from "../../../ACRNContext";
 
 export default class ImportABoardConfigurationFile extends Component {
     constructor(props) {
@@ -19,7 +20,8 @@ export default class ImportABoardConfigurationFile extends Component {
     }
 
     componentDidMount() {
-        acrnConfigurator.getHistory('board').then((boardFiles) => {
+        let {configurator} = this.context
+        configurator.getHistory('board').then((boardFiles) => {
             let disableImport = boardFiles.length === 0
             this.setState({boardFiles, disableImport})
         })
@@ -34,8 +36,9 @@ export default class ImportABoardConfigurationFile extends Component {
     };
 
     boardChange = (filepath) => {
-        acrnConfigurator.addHistory('board', filepath).then(() => {
-            return acrnConfigurator.getHistory('board')
+        let {configurator} = this.context
+        configurator.addHistory('board', filepath).then(() => {
+            return configurator.getHistory('board')
         }).then((boardFiles) => {
             console.log(boardFiles)
             this.setState({
@@ -48,8 +51,10 @@ export default class ImportABoardConfigurationFile extends Component {
     }
 
     importBoard = () => {
+        let {configurator} = this.context
+
         if (!this.state.boardXML) {
-            acrnConfigurator.loadBoard(this.boardXMLSelect.current.value, this.updateBoardInfo)
+            configurator.loadBoard(this.boardXMLSelect.current.value, this.updateBoardInfo)
         } else {
             this.openFileDialog()
         }
@@ -78,76 +83,83 @@ export default class ImportABoardConfigurationFile extends Component {
                 <option key={index} value={optionValue}>{optionValue}</option>
             )
         })
-        return (<>
-            <div className="p-3">
-                <h3>1. Import a board configuration file</h3>
-            </div>
-            <Row className="px-3 py-2">
-                <Col className="border-end-sm py-1" sm>
-
-                    <Form>
-                        <b className="py-3 d-block" style={{"letterSpacing": "0.49px"}}>
-                            {this.state.boardXML ? 'Current board file:' : 'Recently used board files:'}
-                        </b>
-                        <table style={{width: "100%"}}>
-                            <tbody>
-                            <tr>
-                                <td>
-                                    <Form.Select className="d-inline" ref={this.boardXMLSelect}>
-                                        {boardHistorySelect}
-                                    </Form.Select>
-                                    <input type="file" style={{display: "none"}} ref={this.boardXMLFileInput}
-                                           onChange={this.boardChange} onBlur={this.boardChange}/>
-                                </td>
-                                <td>
-                                    <a className="ps-3 text-nowrap" style={{cursor: "pointer"}}
-                                       onClick={this.openFileDialog}>
-                                        Browse for file…
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div className="py-4 text-right">
-                                        <Button
-                                            className="wel-btn" size="lg" onClick={this.importBoard}
-                                            disabled={this.state.disableImport}
-                                        >
-                                            {this.state.boardXML ? 'Use a Different Board…' : 'Import Board File'}
-                                        </Button>
-                                    </div>
-                                </td>
-                                <td/>
-                            </tr>
-                            </tbody>
-                        </table>
-
-
-                    </Form>
-
-                </Col>
-
-                <Col className="py-1 ps-sm-5" sm>
-                    <div className="card">
-                        <div className="card-header">
-                            {this.state.boardXML ? "Current Board: " + this.state.boardName : "No board information has been imported yet."}
-                        </div>
-                        <div className="card-body">
-                            <div className="card-text text-pre-line">
-                                <Row className="px-3 py-2">
-                                    <Col className="py-1" sm>
-                                        {this.state.BASE_BOARD_INFO}
-                                    </Col>
-                                    <Col className="py-1" sm>
-                                        {this.state.BIOS_INFO}
-                                    </Col>
-                                </Row>
-                            </div>
-                        </div>
+        return (
+            <Accordion.Item eventKey="0">
+                <Accordion.Header>
+                    <div className="p-1 fs-4">
+                        1. Import a board configuration file
                     </div>
-                </Col>
-            </Row>
-            <Banner/>
-        </>)
+                </Accordion.Header>
+                <Accordion.Body>
+
+                    <Row className="px-3 py-2">
+                        <Col className="border-end-sm py-1" sm>
+
+                            <Form>
+                                <b className="py-3 d-block" style={{"letterSpacing": "0.49px"}}>
+                                    {this.state.boardXML ? 'Current board file:' : 'Recently used board files:'}
+                                </b>
+                                <table style={{width: "100%"}}>
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            <Form.Select className="d-inline" ref={this.boardXMLSelect}>
+                                                {boardHistorySelect}
+                                            </Form.Select>
+                                            <input type="file" style={{display: "none"}} ref={this.boardXMLFileInput}
+                                                   onChange={this.boardChange} onBlur={this.boardChange}/>
+                                        </td>
+                                        <td>
+                                            <a className="ps-3 text-nowrap" style={{cursor: "pointer"}}
+                                               onClick={this.openFileDialog}>
+                                                Browse for file…
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div className="py-4 text-right">
+                                                <Button
+                                                    className="wel-btn" size="lg" onClick={this.importBoard}
+                                                    disabled={this.state.disableImport}
+                                                >
+                                                    {this.state.boardXML ? 'Use a Different Board…' : 'Import Board File'}
+                                                </Button>
+                                            </div>
+                                        </td>
+                                        <td/>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+
+                            </Form>
+
+                        </Col>
+
+                        <Col className="py-1 ps-sm-5" sm>
+                            <div className="card">
+                                <div className="card-header">
+                                    {this.state.boardXML ? "Current Board: " + this.state.boardName : "No board information has been imported yet."}
+                                </div>
+                                <div className="card-body">
+                                    <div className="card-text text-pre-line">
+                                        <Row className="px-3 py-2">
+                                            <Col className="py-1" sm>
+                                                {this.state.BASE_BOARD_INFO}
+                                            </Col>
+                                            <Col className="py-1" sm>
+                                                {this.state.BIOS_INFO}
+                                            </Col>
+                                        </Row>
+                                    </div>
+                                </div>
+                            </div>
+                        </Col>
+                    </Row>
+                </Accordion.Body>
+            </Accordion.Item>
+        )
     }
 }
+ImportABoardConfigurationFile.contextType = ACRNContext

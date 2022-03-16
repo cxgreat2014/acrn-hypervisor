@@ -1,6 +1,7 @@
 import {Button, Form, Modal} from "react-bootstrap";
 import {Component} from "react";
 import "./CreateScenarioModal.css"
+import {ACRNContext} from "../../../../ACRNContext";
 
 export default class CreateScenarioModal extends Component {
     constructor(props) {
@@ -27,11 +28,12 @@ export default class CreateScenarioModal extends Component {
             SERVICE_VM: this.state.mode === 'PRE_LAUNCHED_VM' ? 0 : getInt('SERVICE_VM'),
             POST_LAUNCHED_VM: this.state.mode === 'PRE_LAUNCHED_VM' ? 0 : getInt('POST_LAUNCHED_VM'),
         }
+        let {configurator} = this.context
 
-        acrnConfigurator.programLayer.newScenario(vmNum.PRE_LAUNCHED_VM, vmNum.SERVICE_VM, vmNum.POST_LAUNCHED_VM)
+        configurator.programLayer.newScenario(vmNum.PRE_LAUNCHED_VM, vmNum.SERVICE_VM, vmNum.POST_LAUNCHED_VM)
         this.setState({show: false})
     }
-    
+
 
     render = () => {
 
@@ -81,13 +83,14 @@ export default class CreateScenarioModal extends Component {
                                 <p className="mt-3">This system’s board supports a maximum of 8 VMs.</p>
                                 <p> How many of each VM type do you want in your scenario? (You can change these
                                     later.)</p>
-                                <div className={"px-4 ms-2 vmNum " +
-                                    "d-flex justify-content-between align-items-center " +
-                                    "flex-wrap align-content-between"}
-                                     style={{maxWidth: '332px'}}>
-                                    <b className={this.state.mode === 'POST_LAUNCHED_VM' ? 'd-none' : ''}>Pre-launch VMs:</b>
+                                <div style={{maxWidth: '332px'}} className={[
+                                    'px-4', 'ms-2', 'vmNum', 'd-flex', 'justify-content-between',
+                                    'align-items-center', 'flex-wrap', 'align-content-between'
+                                ].join(' ')}>
+                                    <b className={this.state.mode === 'POST_LAUNCHED_VM' ? 'd-none' : ''}>Pre-launch
+                                        VMs:</b>
                                     <Form.Control
-                                        type="number" min="0" max="8" defaultValue="0" id="PRE_LAUNCHED_VMInp"
+                                        type="number" min="0" max="8" defaultValue="1" id="PRE_LAUNCHED_VMInp"
                                         className={this.state.mode === 'POST_LAUNCHED_VM' ? 'd-none' : ''}
                                     />
                                     <b className={this.state.mode === 'PRE_LAUNCHED_VM' ? 'd-none' : ''}>Service VM:</b>
@@ -95,9 +98,10 @@ export default class CreateScenarioModal extends Component {
                                         disabled type="number" min="0" max="8" id="SERVICE_VMInp" defaultValue="1"
                                         className={this.state.mode === 'PRE_LAUNCHED_VM' ? 'd-none' : ''}
                                     />
-                                    <b className={this.state.mode === 'PRE_LAUNCHED_VM' ? 'd-none' : ''}>Post-launch VMs:</b>
+                                    <b className={this.state.mode === 'PRE_LAUNCHED_VM' ? 'd-none' : ''}>Post-launch
+                                        VMs:</b>
                                     <Form.Control
-                                        type="number" min="0" max="8" defaultValue="0" id="POST_LAUNCHED_VMInp"
+                                        type="number" min="0" max="8" defaultValue="1" id="POST_LAUNCHED_VMInp"
                                         className={this.state.mode === 'PRE_LAUNCHED_VM' ? 'd-none' : ''}
                                     />
                                 </div>
@@ -120,3 +124,4 @@ export default class CreateScenarioModal extends Component {
     }
 }
 
+CreateScenarioModal.contextType = ACRNContext

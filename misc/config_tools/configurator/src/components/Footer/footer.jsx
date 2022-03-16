@@ -17,6 +17,8 @@ export default class Footer extends Component {
     }
 
     render = () => {
-        return <p className="text-center">© 2022 Intel, Inc. ACRN Configurator - Version {this.state.version}</p>
+        return <div className="pt-3">
+            <p className="text-center text-secondary">© 2022 Intel, Inc. ACRN Configurator - Version {this.state.version}</p>
+        </div>
     }
 }

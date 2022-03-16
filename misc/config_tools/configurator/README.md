@@ -16,9 +16,29 @@ This version based on tauri, WIP.
 ### 1. Install System Dependencies
 
 Please follow [this guide](https://tauri.studio/docs/getting-started/prerequisites)
-to install system dependencies (include yarn).
+to install system dependencies **(include yarn)**.
 
-### 2. How To Build
+### 2. Install Project Dependencies.
+
+#### Linux
+
+```bash
+sudo apt install git
+git clone https://github.com/projectacrn/acrn-hypervisor
+cd acrn-hypervisor
+python3 -m pip install -r misc/config_tools/configurator/requirements.txt
+python3 misc/config_tools/configurator/prebuild.py
+```
+
+#### Windows && macOS
+
+Similar as Linux. 
+
+In macOS need install git by brew. 
+
+In Windows need install git by manual or chocolatey and replace command-line `python3` to `py -3`.
+
+### 3. How To Build
 
 #### Linux
 
@@ -37,7 +57,7 @@ yarn
 yarn build
 ```
 
-### 3. How To Run
+### 4. How To Run
 
 #### Linux
 

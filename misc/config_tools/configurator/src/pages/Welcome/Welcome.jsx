@@ -10,10 +10,6 @@ import UseAnExistingConfigurationPanel from "./UseAnExistingConfigurationPanel";
 import Footer from "../../components/Footer";
 
 class Welcome extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         return (
             <div>

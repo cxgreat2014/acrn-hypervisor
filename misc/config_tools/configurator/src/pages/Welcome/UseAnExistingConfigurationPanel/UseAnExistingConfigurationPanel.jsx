@@ -1,8 +1,9 @@
 import {useNavigate} from "react-router";
 import React from "react";
 import {Button, Form} from "react-bootstrap";
-import {buildPageParams,  unique} from "../../../lib/common";
+import {buildPageParams, unique} from "../../../lib/common";
 import {dialog} from "@tauri-apps/api";
+import {ACRNContext} from "../../../ACRNContext";
 
 
 class UseAnExistingConfigurationPanel extends React.Component {
@@ -16,50 +17,51 @@ class UseAnExistingConfigurationPanel extends React.Component {
         }
     }
 
-    recentDir = () => {
-        let recent
-        if (this.state.recentDirs.length) {
-            recent = this.state.recentDirs
-        } else {
-            recent = localStorage.getItem('ACRN_v1_recentDir')
-            recent = recent ? JSON.parse(recent) : []
-        }
+    componentDidMount() {
+        this.updateHistory()
+    }
 
-        return recent.map(function (boardName, index) {
-            return (<option key={index} value={boardName}>
-                {boardName}
+    updateHistory = () => {
+        let {config, configurator} = this.context
+        return configurator.getHistory(config.configKey.recentlyWorkingFolders)
+            .then((recentDirs) => {
+                this.setState({recentDirs})
+            })
+    }
+
+    recentDir = () => {
+        let recent = this.state.recentDirs
+
+        return recent.map((dirPath, index) => {
+            return (<option key={index} value={dirPath}>
+                {dirPath}
             </option>)
         })
     }
 
     addRecentDir = (dirPath) => {
-        let recent = localStorage.getItem('ACRN_v1_recentDir');
-        recent = recent ? JSON.parse(recent) : []
-        recent.push(dirPath)
-        recent = unique(recent)
-        this.setState({recentDirs: recent})
-        recent = JSON.stringify(recent)
-        localStorage.setItem('ACRN_v1_recentDir', recent)
+        let {config, configurator} = this.context
+        return configurator.addHistory(config.configKey.recentlyWorkingFolders, dirPath)
     }
 
     nextPage = (WorkingFolder) => {
-        this.addRecentDir(WorkingFolder)
-        let pageParams = {WorkingFolder};
-        pageParams = buildPageParams('./config', pageParams)
-        this.navigate(pageParams);
+        this.addRecentDir(WorkingFolder).then(() => {
+            let {settingWorkingFolder} = this.context
+            settingWorkingFolder(WorkingFolder)
+            this.navigate({pathname: './config'});
+        })
     }
 
-    openDir = () => {
-        dialog.open({
+    openDir = async () => {
+        await dialog.open({
             title: 'Open Working Folder',
             directory: true,
             multiple: false
-        }).then((filePath) => {
-                let existDir = filePath
-                this.addRecentDir(existDir)
-                this.pathSelect.current.value = existDir
-            }
-        )
+        }).then(async (existDir) => {
+            await this.addRecentDir(existDir)
+            await this.updateHistory()
+            this.pathSelect.current.value = existDir
+        }).catch()
     }
 
     useFolder = () => {
@@ -68,9 +70,7 @@ class UseAnExistingConfigurationPanel extends React.Component {
             alert("Please select existing configuration folder!")
             return
         }
-
-
-        this.nextPage(folderPath, true)
+        this.nextPage(folderPath)
     }
 
     render() {
@@ -110,6 +110,8 @@ class UseAnExistingConfigurationPanel extends React.Component {
         )
     }
 }
+
+UseAnExistingConfigurationPanel.contextType = ACRNContext
 
 export default function (props) {
     const navigate = useNavigate();

@@ -1,26 +1,18 @@
 import _ from "lodash";
-// import scenarioXSD from "../../schema/sliced.xsd";
-import {Helper, LocalStorageBackend, TauriLocalFSBackend} from "./helper";
-import {resolveHome} from "./common";
 
-import React from "react";
+import React, {Component} from "react";
 import {path} from "@tauri-apps/api";
-// import {initPyodide, convertXSD} from "./runpy";
 import scenario from '../assets/schema/scenario.json'
-// initPyodide().then((pyodide) => {
-//     scenario = convertXSD(scenarioXSD)
-//     console.log(scenario)
-// })
 
-const helper = new Helper(new LocalStorageBackend(), new TauriLocalFSBackend())
 
 function ThrowError(errMsg) {
     alert(errMsg)
     throw new Error(errMsg)
 }
 
-class EventBase {
-    constructor() {
+class EventBase extends Component {
+    constructor(props) {
+        super(props)
         this.funRegister = {}
         this.funRegisterID = 0
         this.eventName = {
@@ -48,8 +40,9 @@ class EventBase {
 
 
 export class XMLLayer extends EventBase {
-    constructor() {
+    constructor(helper) {
         super();
+        this.helper = helper
         this.funRegister = {
             onScenarioLoad: []
         }
@@ -81,7 +74,7 @@ export class XMLLayer extends EventBase {
 
     loadBoard = async (boardXMLPath) => {
         // call by program
-        let boardXMLText = await helper.read(await resolveHome(boardXMLPath))
+        let boardXMLText = await this.helper.read(await this.helper.resolveHome(boardXMLPath))
         if (this.#validateBoardXMLText(boardXMLText)) {
             let PCIDevices = this.getPCIDevice(boardXMLText)
             return {boardXMLText, PCIDevices}
@@ -93,12 +86,12 @@ export class XMLLayer extends EventBase {
     loadScenario = async (scenarioXMLPath) => {
         // call by program
         // load scenario data from xml file
-        let scenarioXMLText = await helper.read(await resolveHome(scenarioXMLPath))
+        let scenarioXMLText = await this.helper.read(await this.helper.resolveHome(scenarioXMLPath))
         if (!this.#validateScenarioXMLText(scenarioXMLText)) {
             ThrowError('Scenario XML Error!')
         }
 
-        return helper.convertXMLTextToObj(scenarioXMLText)['acrn-config']
+        return this.helper.convertXMLTextToObj(scenarioXMLText)['acrn-config']
     }
 
     getPCIDevice = (boardXMLText) => {
@@ -114,23 +107,24 @@ export class XMLLayer extends EventBase {
     }
 
     saveBoard = (boardFileWritePath, boardData) => {
-        helper.save(boardFileWritePath, boardData)
+        this.helper.save(boardFileWritePath, boardData)
     }
 
     saveScenario = (scenarioWritePath, scenarioData) => {
         // call by program
         console.log(scenarioData)
-        const scenarioXML = helper.convertObjToXML({'acrn-config': scenarioData})
+        const scenarioXML = this.helper.convertObjToXML({'acrn-config': scenarioData})
         console.log(scenarioXML)
         // debugger
-        helper.save(scenarioWritePath, scenarioXML)
+        this.helper.save(scenarioWritePath, scenarioXML)
     }
 }
 
 
 export class ProgramLayer extends EventBase {
-    constructor(instanceOfXMLLayer) {
+    constructor(helper, instanceOfXMLLayer) {
         super()
+        this.helper = helper
         this.vmID = 0
         this.scenarioData = {}
         this.initScenario()
@@ -259,7 +253,7 @@ export class ProgramLayer extends EventBase {
         newBoardFileName = newBoardFileName + '.board.xml'
 
         // new board file save path
-        const boardFileWritePath = await path.join(await resolveHome(WorkingFolder), newBoardFileName)
+        const boardFileWritePath = await path.join(await this.helper.resolveHome(WorkingFolder), newBoardFileName)
 
         // remove current working folder old Board File first
         await this.removeOldBoardFile()
@@ -297,10 +291,10 @@ export class ProgramLayer extends EventBase {
     }
 
     async removeOldBoardFile() {
-        let files = await helper.list(await resolveHome(window.WorkingFolder))
+        let files = await this.helper.list(await this.helper.resolveHome(window.WorkingFolder))
         files.map((filename) => {
             if (_.endsWith(filename, '.board.xml')) {
-                helper.remove(filename)
+                this.helper.remove(filename)
             }
         })
     }
@@ -310,7 +304,7 @@ export class ProgramLayer extends EventBase {
         // call by view
         let originScenarioData = this.getOriginScenarioData()
         let filename = 'scenario.xml'
-        let scenarioWritePath = await path.join(await resolveHome(window.WorkingFolder), filename)
+        let scenarioWritePath = await path.join(await this.helper.resolveHome(window.WorkingFolder), filename)
         this.xmlLayer.saveScenario(scenarioWritePath, originScenarioData)
         // noinspection UnnecessaryLocalVariableJS
         let shownPath = await path.join(WorkingFolder, filename)
@@ -319,20 +313,28 @@ export class ProgramLayer extends EventBase {
 
 }
 
-export class ACRNConfigurator extends EventBase {
+export class Configurator extends EventBase {
     // get data from Program
     // convert it to view data
-    constructor() {
+    constructor(helper) {
         super()
-        this.XMLLayer = new XMLLayer()
-        this.programLayer = new ProgramLayer(this.XMLLayer)
+        this.helper = helper
+        this.XMLLayer = new XMLLayer(this.helper)
+        this.programLayer = new ProgramLayer(this.helper, this.XMLLayer)
 
         this.vmSchemas = this.Schemas()
         this.hvSchema = this.vmSchemas.HV
         delete this.vmSchemas.HV
 
-        this.ivshmemEnum()
-        this.programLayer.register("scenarioDataUpdate", this.ivshmemEnum)
+        this.updateSchema()
+    }
+
+    updateSchema = () => {
+        let listingFunctions = [this.ivshmemEnum]
+        listingFunctions.forEach((func) => {
+            func()
+            this.programLayer.register("scenarioDataUpdate", func)
+        })
     }
 
     ivshmemEnum = () => {
@@ -358,16 +360,18 @@ export class ACRNConfigurator extends EventBase {
         callback(shownName, boardXMLText)
     }
 
-    getHistory(mode) {
-        return helper.getConfig(mode + 'History', [])
+    async getHistory(key) {
+        let history = await this.helper.getConfig(key + 'History', [])
+        console.log(key, history)
+        return history
     }
 
-    async addHistory(mode, filePath) {
-        let history = await this.getHistory(mode);
-        history.unshift(filePath)
+    async addHistory(key, historyPath) {
+        let history = await this.getHistory(key);
+        history.unshift(historyPath)
         history = _.uniq(history)
-        console.log(filePath, history)
-        return await helper.setConfig(mode + 'History', history)
+        console.log(historyPath, history)
+        return await this.helper.setConfig(key + 'History', history)
     }
 
 
@@ -407,13 +411,13 @@ export class ACRNConfigurator extends EventBase {
             POST_LAUNCHED_VM: 'PostLaunchedVM'
         }
         for (let key in prefixData) {
-            prefixData[key] = ACRNConfigurator.#getSchema(prefixData[key])
+            prefixData[key] = Configurator.#getSchema(prefixData[key])
         }
         return prefixData
     }
 
     log() {
-        helper.log(...arguments)
+        this.helper.log(...arguments)
     }
 }
 

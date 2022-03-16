@@ -1,10 +1,11 @@
 import React, {Component} from "react";
 import "./ConfigureSettingsForScenario.css"
-import {Button} from "react-bootstrap";
+import {Accordion, Button} from "react-bootstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMinus} from "@fortawesome/free-solid-svg-icons";
 import ConfigTabBar from "./ConfigTabBar/ConfigTabBar";
 import ConfigForm from "./ConfigForm";
+import {ACRNContext} from "../../../ACRNContext";
 
 export default class ConfigureSettingsForScenario extends Component {
     constructor(props) {
@@ -45,39 +46,46 @@ export default class ConfigureSettingsForScenario extends Component {
     }
 
     render = () => {
-        return (<>
-            <div className="p-3 d-flex justify-content-between align-items-center">
-                <h3>3. Configure settings for scenario and launch scripts</h3>
-                <Button size="lg" onClick={() => {
-                    acrnConfigurator.saveScenario()
-                        .then(() => {
-                            alert('Save successful!')
-                        })
-                }}>Save Scenario and Launch Scripts</Button>
-            </div>
-            <div className="p-4">
-                <ConfigTabBar callback={this.tabSwitch}/>
-            </div>
-            <div className="p-4">
-                <div className="d-flex justify-content-between">
-                    <ul className="nav nav-tabs" role="tablist">
-                        {this.tab('BasicForm', 'Basic Parameters', true)}
-                        {this.tab('AdvancedForm', 'Advanced Parameters', false)}
-                    </ul>
-                    <Button className={'deleteVM ' + (this.state.VMID === -1 ? 'd-none' : '')}
-                            size='lg' onClick={() => {
-                        acrnConfigurator.programLayer.deleteVM(this.state.VMID)
-                    }}>
-                        <FontAwesomeIcon icon={faMinus} color="white" size="lg"/> Delete VM
-                    </Button>
+        let {configurator} = this.context
+        return (<Accordion.Item eventKey="2">
+            <Accordion.Header>
+                <div className="p-1 w-100 d-flex justify-content-between align-items-center">
+                    <div className="fs-4">3. Configure settings for scenario and launch scripts</div>
+                    <Button size="lg" onClick={() => {
+                        configurator.saveScenario()
+                            .then(() => {
+                                alert('Save successful!')
+                            })
+                    }}>Save Scenario and Launch Scripts</Button>
                 </div>
-                <div className="tab-content p-3" id="myTabContent"
-                     style={{border: '1px solid #373A77', boxSizing: 'border-box', borderRadius: '0 5px 5px 5px'}}>
-                    {this.tabsContent('Basic', this.state.VMID)}
-                    {this.tabsContent('Advanced', this.state.VMID)}
-                </div>
+            </Accordion.Header>
+            <Accordion.Body>
 
-            </div>
-        </>)
+                <div className="p-4">
+                    <ConfigTabBar callback={this.tabSwitch}/>
+                </div>
+                <div className="p-4">
+                    <div className="d-flex justify-content-between">
+                        <ul className="nav nav-tabs" role="tablist">
+                            {this.tab('BasicForm', 'Basic Parameters', true)}
+                            {this.tab('AdvancedForm', 'Advanced Parameters', false)}
+                        </ul>
+                        <Button className={'deleteVM ' + (this.state.VMID === -1 ? 'd-none' : '')}
+                                size='lg' onClick={() => {
+                            configurator.programLayer.deleteVM(this.state.VMID)
+                        }}>
+                            <FontAwesomeIcon icon={faMinus} color="white" size="lg"/> Delete VM
+                        </Button>
+                    </div>
+                    <div className="tab-content p-3" id="myTabContent"
+                         style={{border: '1px solid #373A77', boxSizing: 'border-box', borderRadius: '0 5px 5px 5px'}}>
+                        {this.tabsContent('Basic', this.state.VMID)}
+                        {this.tabsContent('Advanced', this.state.VMID)}
+                    </div>
+
+                </div>
+            </Accordion.Body>
+        </Accordion.Item>)
     }
 }
+ConfigureSettingsForScenario.contextType = ACRNContext
