@@ -283,13 +283,21 @@ class XS2JS:
 
 
 def main():
-    repo_root = Path(__file__).absolute().parent.parent
-    schema_file = repo_root.parent / 'schema' / 'sliced.xsd'
+    # constant path var
+    repo_root = Path(__file__).absolute().parent.parent.parent.parent
+    configurator_path = repo_root / 'misc' / 'config_tools' / 'configurator'
+
+    # get input and output path
+    schema_file = repo_root / 'misc' / 'config_tools' / 'schema' / 'sliced.xsd'
+    json_schema_file = configurator_path / 'src' / 'assets' / 'schema' / 'scenario.json'
+
+    # Convert XSD to JSON Schema
     json_schema = XS2JS(schema_file).get_json_schema()
     json_schema = json.dumps(json_schema, indent='\t')
-    output_file = os.path.join(repo_root, 'src', 'assets', 'schema', 'scenario.json')
-    open(output_file, 'w', encoding='utf-8').write(json_schema)
-    print("File %s Convert Success. JSON Schema Write To: %s" % (repr(schema_file), repr(output_file)))
+
+    # Write file and print successful message
+    open(json_schema_file, 'w', encoding='utf-8').write(json_schema)
+    print("File %s Convert Success. JSON Schema Write To: %s" % (repr(schema_file), repr(json_schema_file)))
 
 
 if __name__ == '__main__':
