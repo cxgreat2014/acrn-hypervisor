@@ -18,7 +18,7 @@ This version based on tauri, WIP.
 Please follow [this guide](https://tauri.studio/docs/getting-started/prerequisites)
 to install system dependencies **(include yarn)**.
 
-### 2. Clone Project And Install Dependencies.
+### 2. Clone Project And Install Project Dependencies.
 
 #### Linux
 
@@ -32,11 +32,12 @@ yarn
 
 #### Windows && macOS
 
-Similar as Linux. 
+Similar to Linux.
 
-In macOS need install git and python3 by brew. 
+On macOS, you may need to install git and python3 via `brew`.
 
-In Windows need install git and python3 by chocolatey or manual and replace command-line `python3` to `py -3`.
+In Windows environment maybe you need to install git and python3 via chocolatey or manually,
+and replace the command line `python3` with `py -3`.
 
 ### 3. How To Build
 
