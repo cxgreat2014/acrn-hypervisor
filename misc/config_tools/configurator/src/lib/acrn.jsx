@@ -4,6 +4,7 @@ import React, {Component} from "react";
 import {path} from "@tauri-apps/api";
 import scenario from '../assets/schema/scenario.json'
 import {createSearchParams} from "react-router-dom";
+import queryString from 'query-string'
 
 
 function ThrowError(errMsg) {
@@ -335,9 +336,10 @@ export class Configurator extends EventBase {
     }
 
     #getURLParam(key) {
-        let urlPattern = new URLPattern(location.hash.substring(1), location.origin)
-        const searchParams = new URLSearchParams(urlPattern.search)
-        return searchParams.get(key);
+        let hash = location.hash
+        let params = hash.substring(hash.indexOf('?'))
+        params = queryString.parse(params)
+        return params[key]
     }
 
     #buildPageParams(url, queryParams = {}) {
