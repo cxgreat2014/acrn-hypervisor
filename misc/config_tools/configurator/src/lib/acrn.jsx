@@ -81,7 +81,8 @@ export class XMLLayer extends EventBase {
             let PCIDevices = this.getPCIDevice(boardXMLText)
             return {boardXMLText, PCIDevices}
         } else {
-            ThrowError('Board XML Error!')
+            alert('Board XML Error!')
+            return false
         }
     }
 
@@ -240,7 +241,11 @@ export class ProgramLayer extends EventBase {
 
     loadBoard = async (WorkingFolder, boardXMLPath) => {
         // call by view
-        let {boardXMLText, PCIDevices} = await this.xmlLayer.loadBoard(boardXMLPath)
+        let boardData = await this.xmlLayer.loadBoard(boardXMLPath)
+        if (boardData === false) {
+            return false
+        }
+        let {boardXMLText, PCIDevices} = boardData
 
         // get new board file name
         let newBoardFileName = await path.basename(boardXMLPath)
@@ -376,7 +381,12 @@ export class Configurator extends EventBase {
 
 
     loadBoard = async (boardXMLPath, callback) => {
-        let {shownName, boardXMLText, PCIDevices} = await this.programLayer.loadBoard(this.WorkingFolder, boardXMLPath)
+        let boardData = await this.programLayer.loadBoard(this.WorkingFolder, boardXMLPath)
+        if (boardData === false) {
+            await this.removeHistory('board', boardXMLPath)
+            return
+        }
+        let {shownName, boardXMLText, PCIDevices} = boardData
         scenario.definitions.PCIDevsConfiguration.properties.pci_dev.items.enum = PCIDevices
         Object.keys(this.vmSchemas).map((VMTypeKey) => {
             Object.keys(this.vmSchemas[VMTypeKey]).map((configLevelKey) => {
@@ -397,7 +407,20 @@ export class Configurator extends EventBase {
         history.unshift(historyPath)
         history = _.uniq(history)
         console.log(historyPath, history)
+        return this.setHistory(key, history)
+    }
+
+    async setHistory(key, history) {
         return await this.helper.setConfig(key + 'History', history)
+    }
+
+    async removeHistory(key, historyPath) {
+        let history = await this.getHistory(key)
+        let index = history.indexOf(historyPath);
+        if (index > -1) {
+            history.splice(index, 1);
+        }
+        return this.setHistory(key, history)
     }
 
 

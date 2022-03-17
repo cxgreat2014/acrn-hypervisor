@@ -59,6 +59,7 @@ export default class CreateNewOrImportAnExistingScenario extends Component {
     };
 
     render = () => {
+        let {configurator} = this.context
         let scenarioHistorySelect = this.state.scenarioConfigFiles.map((optionValue, index) => {
             return (<option key={index} value={optionValue}>{optionValue}</option>)
         })
