@@ -24,7 +24,7 @@ to install system dependencies **(include yarn)**.
 
 ```bash
 sudo apt install git
-git clone https://github.com/projectacrn/acrn-hypervisor
+git clone https://github.com/Weiyi-Feng/acrn-hypervisor
 cd acrn-hypervisor/misc/config_tools/configurator
 python3 -m pip install -r requirements.txt
 yarn
