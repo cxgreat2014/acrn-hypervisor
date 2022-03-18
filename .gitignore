@@ -6,5 +6,8 @@ build
 *.warnings
 *.pyc
 /offline-tools/
+.idea
+venv
+/misc/config_tools/schema/sliced.xsd
 *.egg-info
 /misc/config_tools/dist
