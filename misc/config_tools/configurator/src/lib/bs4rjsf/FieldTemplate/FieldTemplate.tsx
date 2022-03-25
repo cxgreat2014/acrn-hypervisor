@@ -9,7 +9,7 @@ import WrapIfAdditional from "./WrapIfAdditional";
 
 import {OverlayTrigger, Popover} from "react-bootstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCircleExclamation} from "@fortawesome/free-solid-svg-icons";
+import {faCircleInfo, faCircleExclamation} from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 
 const FieldTemplate = (
@@ -39,6 +39,7 @@ const FieldTemplate = (
     let dlva = uiSchema.hasOwnProperty("ui:descLabelAli") && uiSchema["ui:descLabelAli"] === 'V'
     if (displayLabel && rawDescription) {
         let desc
+        const icon = rawErrors.length > 0 ? faCircleExclamation : faCircleInfo;
         if (descLabel) {
             if (dlva) {
                 desc = <OverlayTrigger
@@ -111,7 +112,7 @@ const FieldTemplate = (
                 }>
                 <div className="mx-2 py-2 descInfoBtn">
                     <FontAwesomeIcon
-                        icon={faCircleExclamation}
+                        icon={icon}
                         color={rawErrors.length > 0 ? "red" : ""}
                     />
                 </div>
