@@ -157,7 +157,19 @@ class XS2JS:
                 js_st.move_to_end('title', False)
             if 'xs:enumeration' in restriction:
                 type_func = {"string": str, "integer": int}.get(js_st['type'], str)
-                js_st["enum"] = [type_func(x['@value']) for x in restriction['xs:enumeration']]
+                # enum
+                enum = []
+                for enum_element in restriction['xs:enumeration']:
+                    enum.append(type_func(enum_element['@value']))
+                js_st["enum"] = enum
+
+                # enumNames
+                if enum and '@acrn:title' in restriction['xs:enumeration'][0].get('xs:annotation', {}):
+                    enum_names = []
+                    for enum_element in restriction['xs:enumeration']:
+                        enum_names.append(enum_element['xs:annotation']['@acrn:title'])
+                    js_st["enumNames"] = enum_names
+
             js_st.update(self.xsa2jsa(restriction))
             return js_st
         elif 'xs:union' in obj:
