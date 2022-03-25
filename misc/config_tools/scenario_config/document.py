@@ -53,6 +53,16 @@ class RSTNormalizer:
 
     @staticmethod
     def __convert_inv(url):
+        try:
+            inv_data = RSTNormalizer.__prase_inv_file(url)
+        except Exception as e:
+            print(e)
+            print('Download inv data failed, document link will link to search page.')
+            inv_data = None
+        return inv_data
+
+    @staticmethod
+    def __prase_inv_file(filename):
         class MockConfig:
             intersphinx_timeout: int = None
             tls_verify = False
@@ -65,16 +75,6 @@ class RSTNormalizer:
             def warn(self, msg: str) -> None:
                 print(msg, file=sys.stderr)
 
-        try:
-            inv_data = RSTNormalizer.__prase_inv_file(url)
-        except Exception as e:
-            print(e)
-            print('Download inv data failed, document link will link to search page.')
-            inv_data = None
-        return inv_data
-
-    @staticmethod
-    def __prase_inv_file(filename):
         invdata = fetch_inventory(MockApp(), '', filename)  # type: ignore
         result = {}
         for key in sorted(invdata or {}):
