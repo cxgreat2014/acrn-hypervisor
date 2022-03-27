@@ -302,13 +302,13 @@ class XS2JS:
 
 
 def main():
-    # constant path var
-    repo_root = Path(__file__).absolute().parent.parent.parent.parent
-    configurator_path = repo_root / 'misc' / 'config_tools' / 'configurator'
+    # find acrn-hypervisor/misc/config_tools folder
+    config_tools = Path(__file__).absolute()
+    while config_tools.name != "config_tools":
+        config_tools = config_tools.parent
 
-    # get input and output path
-    schema_file = repo_root / 'misc' / 'config_tools' / 'schema' / 'sliced.xsd'
-    json_schema_file = configurator_path / 'src' / 'assets' / 'schema' / 'scenario.json'
+    schema_file = config_tools / 'schema' / 'sliced.xsd'
+    json_schema_file = config_tools / 'configurator' / 'src' / 'assets' / 'schema' / 'scenario.json'
 
     # Convert XSD to JSON Schema
     json_schema = XS2JS(schema_file).get_json_schema()

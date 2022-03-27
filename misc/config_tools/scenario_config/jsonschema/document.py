@@ -147,9 +147,9 @@ class ACRNDocumentStringConvertor:
 doc_html = ''
 if __name__ == '__main__':
     WEB = False
-    if 'params' in locals():
+    if 'params' in globals():
         WEB = True
-        # noinspection PyUnboundLocalVariable
+        # noinspection PyUnboundLocalVariable,PyUnresolvedReferences
         params_data = base64.b64decode(params)
         params = json.loads(params_data)
     else:
