@@ -32,7 +32,11 @@ from collections import OrderedDict
 from pathlib import Path
 
 import xmltodict
-from document import ACRNDocumentStringConvertor
+
+try:
+    from .document import ACRNDocumentStringConvertor
+except ImportError:
+    from document import ACRNDocumentStringConvertor
 
 
 class XSTypes:
@@ -262,13 +266,27 @@ class XS2JS:
 
             # get description
             if 'xs:annotation' in element:
+                # title
                 js_ele['title'] = element['xs:annotation'].get('@acrn:title', name)
+
+                # documentation
                 documentation: str = element['xs:annotation'].get('xs:documentation', None)
                 if documentation is None or documentation.strip() == '':
                     documentation = ''
                 if documentation:
                     documentation = self.desc_conv.convert(documentation)
                 js_ele['description'] = documentation
+
+                # dynamic enum
+                if '@acrn:options' in element['xs:annotation']:
+                    dynamic_enum = {
+                        'type': 'dynamicEnum',
+                        'function': 'get_enum',
+                        'source': 'board_xml',
+                        'selector': element['xs:annotation']['@acrn:options'],
+                        'sorted': element['xs:annotation'].get('@acrn:options-sorted-by', None)
+                    }
+                    js_ele['enum'] = dynamic_enum
 
             properties[name] = js_ele
 

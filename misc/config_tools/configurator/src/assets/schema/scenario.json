@@ -598,7 +598,14 @@
 						"type": "string"
 					},
 					"title": "PCI device assignment",
-					"description": "<p>Select the PCI devices you want to assign to this virtual machine.</p>"
+					"description": "<p>Select the PCI devices you want to assign to this virtual machine.</p>",
+					"enum": {
+						"type": "dynamicEnum",
+						"function": "get_enum",
+						"source": "board_xml",
+						"selector": "//device[class]/@description",
+						"sorted": "lambda s: (s.split(' ', maxsplit=1)[-1].split(':')[0], s.split(' ')[0])"
+					}
 				}
 			}
 		},
@@ -621,7 +628,14 @@
 				"SERIAL_CONSOLE": {
 					"$ref": "#/definitions/SerialConsoleOptions",
 					"title": "Serial console port",
-					"description": "<p>Select the host serial device used for hypervisor debugging.</p>"
+					"description": "<p>Select the host serial device used for hypervisor debugging.</p>",
+					"enum": {
+						"type": "dynamicEnum",
+						"function": "get_enum",
+						"source": "board_xml",
+						"selector": "//ttys/serial[type != '0']/dev_path/text()",
+						"sorted": null
+					}
 				},
 				"MEM_LOGLEVEL": {
 					"$ref": "#/definitions/LogLevelType",
