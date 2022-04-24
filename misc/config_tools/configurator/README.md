@@ -18,6 +18,12 @@ This version based on tauri, WIP.
 Please follow [this guide](https://tauri.studio/docs/getting-started/prerequisites)
 to install system dependencies **(including yarn)**.
 
+In Windows, [chocolatey](https://chocolatey.org/) is a Windows package manager,
+you can use `choco install xsltproc` to install `xsltproc` package,
+which provide `xmllint` command.
+
+PS: .
+
 ### 2. Clone Project And Install Project Dependencies.
 
 #### Linux
@@ -54,9 +60,15 @@ make configurator
 Run follow command in the 'acrn-hypervisor' directory.
 
 ```shell
-python3 misc/config_tools/scenario_config/schema_slicer.py
-python3 misc/config_tools/scenario_config/xs2js.py
-cd misc/config_tools/configurator
+cd misc/config_tools
+python scenario_config/schema_slicer.py
+python scenario_config/xs2js.py
+xmllint --xinclude schema/datachecks.xsd > schema/allchecks.xsd
+
+python -m build
+
+cd configurator
+python thirdLib/manager.py install
 yarn build
 ```
 
