@@ -8,6 +8,9 @@ import tauri from "./thirdLib/tauri-plugin";
 export default defineConfig({
     base: './',
     plugins: [vue(), tauri()],
+    resolve: {
+        extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
+    },
     build: {
         outDir: path.resolve(__dirname, 'build')
     }
