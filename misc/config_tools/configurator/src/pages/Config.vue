@@ -80,7 +80,7 @@ import Banner from '../components/common/Banner.vue';
 import Board from "./Config/Board.vue";
 import Scenario from "./Config/Scenario.vue";
 import TabBox from "./Config/ConfigForm/TabBox.vue";
-import ConfigForm from "./Config/ConfigForm/ConfigForm.vue";
+import ConfigForm from "./Config/ConfigForm.vue";
 
 import configurator from "../lib/acrn";
 
@@ -119,7 +119,6 @@ export default {
       this.updateCurrentFormSchema()
     },
     updateCurrentFormSchema() {
-      console.log(this.schemas)
       if (this.activeVMID === -1) {
         this.currentFormSchema = this.schemas.HV
       } else {
@@ -141,7 +140,6 @@ export default {
       this.updateCurrentFormData()
     },
     updateCurrentFormData() {
-      console.log(this.scenario)
       if (this.activeVMID === -1) {
         this.currentFormData = this.scenario.hv;
       }

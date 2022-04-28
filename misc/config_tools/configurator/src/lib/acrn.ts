@@ -1,6 +1,5 @@
 import {dialog, invoke} from "@tauri-apps/api";
 import JSON2XML from "./json2xml"
-import scenarioSchema from "../assets/schema/scenario.json";
 import {OpenDialogOptions} from "@tauri-apps/api/dialog";
 
 enum HistoryType {
@@ -93,13 +92,8 @@ class Configurator {
     loadBoard(path: String) {
         return this.readFile(path)
             .then((fileContent) => {
-                let params = JSON.stringify({
-                    boardXML: fileContent,
-                    scenarioSchema: scenarioSchema
-                })
                 return this.pythonObject.loadBoard(fileContent)
             })
-
     }
 
     loadScenario(path: String): Object {
