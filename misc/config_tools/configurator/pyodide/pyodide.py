@@ -32,11 +32,11 @@ nuc11_board = file_text(nuc11_folder / 'nuc11tnbi5.xml')
 nuc11_scenario = file_text(nuc11_folder / 'shared_launch_6user_vm.xml')
 scenario_json_schema = file_text(configurator_dir / 'src' / 'assets' / 'schema' / 'scenario.json')
 
-debug = sys.platform != 'emscripten'
+IS_WEB = sys.platform == 'emscripten'
 
 
 def convert_result(result):
-    if debug:
+    if not IS_WEB:
         print(json.dumps(result, indent='  '))
     return json.dumps(result)
 

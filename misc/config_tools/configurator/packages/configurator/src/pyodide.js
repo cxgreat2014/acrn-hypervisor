@@ -1,4 +1,10 @@
 import {loadPyodide} from "/thirdLib/pyodide/pyodide";
+import scenarioJSONSchema from './assets/schema/scenario.json';
+
+window.__dynamic__load__scenario__from__pyodide__ = () => {
+    return JSON.stringify(scenarioJSONSchema)
+}
+
 
 export default async function () {
     let pyodide = await loadPyodide({
