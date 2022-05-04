@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-misc/config_tools/configurator/thirdLib/manager.py
-depend on misc/config_tools/configurator/thirdLib/library.json
+misc/config_tools/configurator/packages/configurator/thirdLib/manager.py
+depend on misc/config_tools/configurator/packages/configurator/thirdLib/library.json
 """
 import argparse
 import os

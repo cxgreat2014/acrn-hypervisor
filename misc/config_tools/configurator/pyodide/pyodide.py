@@ -20,7 +20,7 @@ def file_text(path):
 
 # path define
 config_tools_dir = Path(__file__).absolute().parent.parent.parent
-configurator_dir = config_tools_dir / 'configurator'
+configurator_dir = config_tools_dir / 'configurator' / 'packages' / 'configurator'
 schema_dir = config_tools_dir / 'schema'
 scenario_xml_schema_path = schema_dir / 'sliced.xsd'
 datachecks_xml_schema_path = schema_dir / 'allchecks.xsd'

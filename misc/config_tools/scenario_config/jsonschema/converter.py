@@ -26,6 +26,7 @@ open(output_file, 'w', encoding='utf-8').write(json_schema)
 
 """
 __package__ = 'scenario_config.jsonschema'
+
 import os
 import json
 import re
@@ -371,7 +372,7 @@ def main():
         config_tools = config_tools.parent
 
     schema_file = config_tools / 'schema' / 'sliced.xsd'
-    json_schema_file = config_tools / 'configurator' / 'src' / 'assets' / 'schema' / 'scenario.json'
+    json_schema_file = config_tools / 'configurator' / 'packages' / 'configurator' / 'src' / 'assets' / 'schema' / 'scenario.json'
 
     # Convert XSD to JSON Schema
     # Todo: turn off it
