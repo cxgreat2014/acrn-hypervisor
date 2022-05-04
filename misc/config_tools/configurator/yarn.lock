@@ -71,7 +71,7 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
-"@tauri-apps/api@^1.0.0-rc.3":
+"@tauri-apps/api@^1.0.0-rc.4":
   version "1.0.0-rc.4"
   resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-1.0.0-rc.4.tgz#454ef7b15237f3d5752bbfc09c8997a00b1e8a9b"
   integrity sha512-1HaUsx8+TzFHDoQ+Mmd6RWaMsPyZlurQHgACDt+il5e/ui6pDkumVXaS92SnY5XOcS4gBC0BkgjVfkWgcm/Oww==
@@ -123,7 +123,7 @@
   resolved "https://registry.yarnpkg.com/@tauri-apps/cli-win32-x64-msvc/-/cli-win32-x64-msvc-1.0.0-rc.9.tgz#4136d9837efb3c1bf56340d3b5abf56c10b8c7a5"
   integrity sha512-hJjnpl864OhpIp2lTMTW4ad2Aia5/Tbf7k8GJILzUY/XkBhZjNIgZORa8bDcnZRCTU+RDgMFc+AoKtDIircjnA==
 
-"@tauri-apps/cli@^1.0.0-rc.8":
+"@tauri-apps/cli@^1.0.0-rc.9":
   version "1.0.0-rc.9"
   resolved "https://registry.yarnpkg.com/@tauri-apps/cli/-/cli-1.0.0-rc.9.tgz#727159fa07bb2829b27abc3540324adfcff59f7a"
   integrity sha512-j+HZ65wdfFrMwisYeQpdZnldONevBPHjAo9v9Impf0irUU2UR5nwyvyArHTaWCvNeqEs+YV4XXHsfm2xVpnaug==
@@ -162,6 +162,11 @@
   version "4.14.182"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.182.tgz#05301a4d5e62963227eaafe0ce04dd77c54ea5c2"
   integrity sha512-/THyiqyQAP9AfARo4pF+aCGcyiQ94tX/Is2I7HofNRqoYLgN1PBoOWu2/zTA5zMxzP5EFutMtWtGAFRKUe961Q==
+
+"@types/node@^16.11.33":
+  version "16.11.33"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.33.tgz#566713b1b626f781c5c58fe3531307283e00720c"
+  integrity sha512-0PJ0vg+JyU0MIan58IOIFRtSvsb7Ri+7Wltx2qAg94eMOrpg4+uuP3aUHCpxXc1i0jCXiC+zIamSZh3l9AbcQA==
 
 "@types/node@~14.14.31":
   version "14.14.45"
