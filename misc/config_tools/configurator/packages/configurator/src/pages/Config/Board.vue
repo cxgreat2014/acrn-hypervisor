@@ -74,7 +74,7 @@ export default {
       default: {}
     }
   },
-  emits:['boardUpdate'],
+  emits: ['boardUpdate'],
   data() {
     return {
       boardHistory: [],
@@ -83,7 +83,10 @@ export default {
   },
   mounted() {
     this.getBoardHistory()
-    //Todo: auto load board
+        .then(() => {
+          this.importBoard()
+        })
+    // Todo: auto load board
   },
   computed: {
     imported() {
@@ -103,7 +106,7 @@ export default {
       if (this.currentSelectedBoard.length > 0) {
         configurator.loadBoard(this.currentSelectedBoard)
             .then(({scenarioJSONSchema, boardInfo}) => {
-              this.$emit('boardUpdate', boardInfo,scenarioJSONSchema);
+              this.$emit('boardUpdate', boardInfo, scenarioJSONSchema);
               let boardFileNewPath = this.WorkingFolder + boardInfo.name;
               // Todo: use rust command writeBoard to fix bugs.
               configurator.writeFile(boardFileNewPath, boardInfo.content)

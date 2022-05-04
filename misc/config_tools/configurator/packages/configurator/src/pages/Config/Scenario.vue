@@ -62,20 +62,27 @@ export default {
     }
   },
   mounted() {
-    this.getScenarioHistory()
+    this.getScenarioHistory().then(() => {
+      // delay 2s for board loading
+      setTimeout(() => {
+        this.loadScenario(true)
+      }, 2000);
+    })
     // Todo: auto load scenario
   },
   methods: {
     newScenario(data) {
       this.$emit('scenarioUpdate', data)
     },
-    loadScenario() {
+    loadScenario(auto = false) {
       if (this.currentSelectedScenario.length > 0) {
         configurator.loadScenario(this.currentSelectedScenario)
             .then((scenarioConfig) => {
               console.log(scenarioConfig)
               this.$emit('scenarioUpdate', scenarioConfig['acrn-config'])
-              alert(`Scenario ${this.currentSelectedScenario} loaded success!`)
+              if (!auto) {
+                alert(`Scenario ${this.currentSelectedScenario} loaded success!`)
+              }
             })
 
 
@@ -95,7 +102,7 @@ export default {
       })
     },
     getScenarioHistory() {
-      configurator.getHistory("Scenario")
+      return configurator.getHistory("Scenario")
           .then((scenarioHistory) => {
             this.scenarioHistory = scenarioHistory
             if (this.scenarioHistory.length > 0) {

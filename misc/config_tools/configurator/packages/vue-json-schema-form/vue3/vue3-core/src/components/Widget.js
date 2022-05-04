@@ -6,7 +6,7 @@ import {
     computed, h, ref, watch, inject
 } from 'vue';
 
-import { IconQuestion } from '@lljj/vjsf-utils/icons';
+import { IconInfo } from '@lljj/vjsf-utils/icons';
 
 import { validateFormDataAndTransformMsg } from '@lljj/vjsf-utils/schema/validate';
 import { fallbackLabel } from '@lljj/vjsf-utils/formUtils';
@@ -202,7 +202,7 @@ export default {
                 trigger: 'hover'
             }, {
                 default: () => descriptionVNode,
-                reference: () => h(IconQuestion)
+                reference: () => h(IconInfo)
             }) : null;
 
             // form-item style
@@ -294,8 +294,8 @@ export default {
                                 genFormItemRequired: props.required,
                             },
                         }, [
-                            `${label}`,
                             ...miniDescriptionVNode ? [miniDescriptionVNode] : [],
+                            `${label}`,
                             `${(props.formProps && props.formProps.labelSuffix) || ''}`
                         ])
                     } : {},

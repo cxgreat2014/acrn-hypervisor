@@ -16,7 +16,7 @@ import * as schemaValidate from '@lljj/vjsf-utils/schema/validate';
 import getDefaultFormState from '@lljj/vjsf-utils/schema/getDefaultFormState';
 import WIDGET_MAP from './config/widgets/WIDGET_MAP.js';
 
-import './style.css';
+import './style.scss';
 
 const globalOptions = {
     WIDGET_MAP,

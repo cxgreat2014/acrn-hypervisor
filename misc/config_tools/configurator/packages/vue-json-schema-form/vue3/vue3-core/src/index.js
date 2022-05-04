@@ -13,7 +13,7 @@ import getDefaultFormState from '@lljj/vjsf-utils/schema/getDefaultFormState';
 import { deepEquals } from '@lljj/vjsf-utils/utils';
 
 // 基础公共样式
-import '@lljj/vjsf-utils/style/baseForm.css';
+import '@lljj/vjsf-utils/style/baseForm.scss';
 
 import vueProps from './props';
 

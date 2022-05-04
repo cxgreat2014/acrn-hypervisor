@@ -8,7 +8,8 @@
   },
   "description": "ACRN Configurator",
   "workspaces": [
-    "packages/configurator"
+    "packages/configurator",
+    "packages/vue-json-schema-form/**"
   ],
   "scripts": {
     "dev": "yarn workspace acrn-configurator dev",
