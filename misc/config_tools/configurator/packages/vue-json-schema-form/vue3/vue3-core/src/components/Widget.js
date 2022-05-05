@@ -296,6 +296,7 @@ export default {
                         }, [
                             ...miniDescriptionVNode ? [miniDescriptionVNode] : [],
                             `${label}`,
+                           // `${props.curNodePath}`,
                             `${(props.formProps && props.formProps.labelSuffix) || ''}`
                         ])
                     } : {},

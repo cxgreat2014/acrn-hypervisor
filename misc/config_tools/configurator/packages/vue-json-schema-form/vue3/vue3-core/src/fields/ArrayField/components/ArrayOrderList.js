@@ -110,6 +110,15 @@ export default {
                                 'div',
                                 {
                                     class: {
+                                        arrayListItem_content: true
+                                    }
+                                },
+                                [VNodeItem]
+                            ),
+                            h(
+                                'div',
+                                {
+                                    class: {
                                         arrayListItem_operateTool: true
                                     }
                                 },
@@ -194,15 +203,6 @@ export default {
                                         [h(IconClose)]
                                     )
                                 ]
-                            ),
-                            h(
-                                'div',
-                                {
-                                    class: {
-                                        arrayListItem_content: true
-                                    }
-                                },
-                                [VNodeItem]
                             )
                         ]
                     );
