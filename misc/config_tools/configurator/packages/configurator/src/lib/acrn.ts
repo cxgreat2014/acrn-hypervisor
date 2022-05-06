@@ -33,6 +33,10 @@ class PythonObject {
     generateLaunchScript(boardXMLText, scenarioXMLText) {
         return this.api('generateLaunchScript', boardXMLText, scenarioXMLText)
     }
+
+    populateDefaultValues(scenarioXMLText) {
+        return this.api('populateDefaultValues', scenarioXMLText)
+    }
 }
 
 class Configurator {

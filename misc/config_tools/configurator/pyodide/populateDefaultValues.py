@@ -15,7 +15,8 @@ from scenario_config.pipeline import PipelineObject, PipelineEngine
 from scenario_config.xml_loader import XMLLoadStage
 from scenario_config.default_populator import DefaultValuePopulatingStage
 
-from .pyodide import write_temp_file, nuc11_scenario, scenario_xml_schema_path
+from .pyodide import write_temp_file, nuc11_scenario, scenario_xml_schema_path, convert_result
+from .loadScenario import main as load_scenario_xml
 
 
 def main(scenario):
@@ -36,7 +37,9 @@ def main(scenario):
             schema_path=scenario_xml_schema_path,
         )
         pipeline.run(obj)
-        return tostring(obj.get("scenario_etree").getroot())
+        result = tostring(obj.get("scenario_etree").getroot())
+        result = result.decode()
+    return load_scenario_xml(result)
 
 
 def test():
