@@ -145,6 +145,12 @@ class XS2JS:
         json_schema["definitions"] = self._get_definitions()
         return json_schema
 
+    def convert_widget_config(self, annotation, js_ele):
+        if '@acrn:widget' in annotation:
+            js_ele['ui:widget'] = annotation['@acrn:widget']
+            if '@acrn:widget-options' in annotation:
+                js_ele['ui:options'] = {eval(k): eval(v) for k, v in [kv.split('=') for kv in annotation['@acrn:widget-options'].split(',')]}
+
     def xst2jst(self, type_name) -> str:
         """convert xml schema type name to json schema type name"""
         if type_name in self.xst2jst_mapping:
@@ -188,6 +194,10 @@ class XS2JS:
                             print('Warning!: enum element {} does not provide a enumName'.format(str(enum_element)))
                             enum_names.append(enum_name)
                     js_st["enumNames"] = enum_names
+
+                # widget and its options
+                if 'xs:annotation' in obj:
+                    self.convert_widget_config(obj['xs:annotation'], js_st)
 
             js_st.update(self.xsa2jsa(restriction))
             return js_st
@@ -333,6 +343,9 @@ class XS2JS:
                         'sorted': element['xs:annotation'].get('@acrn:options-sorted-by', None)
                     }
                     js_ele['enum'] = dynamic_enum
+
+                # widget and its options
+                self.convert_widget_config(element['xs:annotation'], js_ele)
 
             properties[name] = js_ele
 
