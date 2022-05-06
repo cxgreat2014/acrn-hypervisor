@@ -90,6 +90,7 @@ export default {
   props: ['WorkingFolder'],
   mounted() {
     this.updateCurrentFormSchema()
+    window.getCurrentScenarioData = this.getCurrentScenarioData
   },
   data() {
     return {
@@ -138,6 +139,9 @@ export default {
       this.scenario = scenarioData;
       this.updateCurrentFormSchema()
       this.updateCurrentFormData()
+    },
+    getCurrentScenarioData() {
+      return this.scenario
     },
     updateCurrentFormData() {
       if (this.activeVMID === -1) {

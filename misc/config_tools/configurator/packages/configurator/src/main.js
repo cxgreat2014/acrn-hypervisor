@@ -13,9 +13,11 @@ if (isTauri) {
 
     window.openDevTools = openDevTools;
 } else {
-    // Patch Browser function to mock Tauri env
-    let mockJS = await import('../tests/mock');
-    mockJS.default();
+    (async () => {
+        // Patch Browser function to mock Tauri env
+        let mockJS = await import('../tests/mock');
+        mockJS.default();
+    })()
 }
 
 import {createApp} from 'vue';

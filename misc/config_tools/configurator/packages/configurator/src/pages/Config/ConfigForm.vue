@@ -56,7 +56,7 @@ import VueForm, {i18n} from "@lljj/vue3-form-naive"
 import {Icon} from "@vicons/utils";
 import {Minus} from "@vicons/fa"
 import localizeEn from 'ajv-i18n/localize/en';
-
+import IVSHMEM_REGION from "./ConfigForm/CustomWidget/IVSHMEM_REGION.vue";
 
 i18n.useLocal(localizeEn);
 export default {
@@ -77,7 +77,38 @@ export default {
         "labelWidth": "300px",
         "labelSuffix": "："
       },
-      uiSchema: {}
+      uiSchema: {
+        "FEATURES": {
+          "IVSHMEM": {
+            "ui:title": "InterVM shared memory",
+            "IVSHMEM_REGION": {
+              "ui:title": "",
+              "ui:sortable": false,
+              "ui:field": IVSHMEM_REGION,
+              "items": {
+                "IVSHMEM_VMS": {
+                  "IVSHMEM_VM": {
+                    "ui:sortable": false,
+                    "items": {
+                      "VBDF": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "vuart_connections": {
+          "vuart_connection": {
+            "ui:sortable": false,
+            "items": {
+              "endpoint": {
+                "ui:sortable": false
+              }
+            }
+          }
+        }
+      }
     };
   },
   methods: {
