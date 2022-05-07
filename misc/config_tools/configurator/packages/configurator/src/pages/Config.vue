@@ -90,6 +90,7 @@ export default {
   props: ['WorkingFolder'],
   mounted() {
     this.updateCurrentFormSchema()
+    window.getCurrentScenarioData = this.getCurrentScenarioData
   },
   data() {
     return {
@@ -138,6 +139,9 @@ export default {
       this.scenario = scenarioData;
       this.updateCurrentFormSchema()
       this.updateCurrentFormData()
+    },
+    getCurrentScenarioData() {
+      return this.scenario
     },
     updateCurrentFormData() {
       if (this.activeVMID === -1) {
@@ -197,12 +201,22 @@ export default {
       this.updateCurrentFormData()
     },
     saveScenario(event) {
+      // get scenario XML
       let scenarioXMLData = configurator.convertScenarioToXML(
           {
             // simple deep copy
             "acrn-config": JSON.parse(JSON.stringify(this.scenario))
           }
       );
+      // get scenario Defaults
+      let scenarioWithDefault = configurator.pythonObject.populateDefaultValues(scenarioXMLData)
+      console.log(scenarioWithDefault)
+      // write defaults to frontend
+      this.scenario = scenarioWithDefault['acrn-config']
+      // get scenario XML with defaults
+      scenarioXMLData = configurator.convertScenarioToXML(scenarioWithDefault)
+
+      // begin write down and verify
       configurator.writeFile(this.WorkingFolder + 'scenario.xml', scenarioXMLData)
           .then(() => configurator.pythonObject.validateScenario(this.board.content, scenarioXMLData))
           .then((result) => {

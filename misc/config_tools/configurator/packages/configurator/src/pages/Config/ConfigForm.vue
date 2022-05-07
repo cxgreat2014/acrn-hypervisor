@@ -62,12 +62,7 @@ import VueForm, {i18n} from "@lljj/vue3-form-naive"
 import {Icon} from "@vicons/utils";
 import {Minus} from "@vicons/fa"
 import localizeEn from 'ajv-i18n/localize/en';
-import IVSHMEM_REGION from "./ConfigForm/CustomWidget/IVSHMEM_REGION";
-
-
-
-
-
+import IVSHMEM_REGION from "./ConfigForm/CustomWidget/IVSHMEM_REGION.vue";
 
 i18n.useLocal(localizeEn);
 export default {
@@ -95,7 +90,7 @@ export default {
             "IVSHMEM_REGION": {
               "ui:title": "",
               "ui:sortable": false,
-              "ui:widget": IVSHMEM_REGION,
+              "ui:field": IVSHMEM_REGION,
               "items": {
                 "IVSHMEM_VMS": {
                   "IVSHMEM_VM": {
