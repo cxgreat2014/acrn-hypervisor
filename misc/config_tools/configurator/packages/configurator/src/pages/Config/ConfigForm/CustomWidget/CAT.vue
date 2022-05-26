@@ -117,21 +117,17 @@ export default {
     this.updateCatInfo()
   },
   computed: {
-    VCAT_ENABLED: {
-      get() {
-        return vueUtils.getPathVal(this.rootFormData, 'FEATURES.RDT.VCAT_ENABLED')
-      },
-      set(value) {
-        vueUtils.setPathVal(this.rootFormData, 'FEATURES.RDT.VCAT_ENABLED', value)
-        this.updateCatInfo()
-      }
-    },
     SSRAM_ENABLED: {
       get() {
         return vueUtils.getPathVal(this.rootFormData, 'FEATURES.SSRAM.SSRAM_ENABLED')
       },
       set(value) {
         vueUtils.setPathVal(this.rootFormData, 'FEATURES.SSRAM.SSRAM_ENABLED', value)
+        if (value === 'y') {
+          if (this.RDT_ENABLED === 'y') {
+            this.RDT_ENABLED = 'n'
+          }
+        }
       }
     },
     RDT_ENABLED: {
@@ -140,6 +136,19 @@ export default {
       },
       set(value) {
         vueUtils.setPathVal(this.rootFormData, 'FEATURES.RDT.RDT_ENABLED', value)
+        if (value === 'y') {
+          if (this.SSRAM_ENABLED === 'y') {
+            this.SSRAM_ENABLED = 'n'
+          }
+        }
+        if (value === 'n') {
+          if (this.CDP_ENABLED === 'y') {
+            this.CDP_ENABLED = 'n'
+          }
+          if (this.VCAT_ENABLED === 'y') {
+            this.VCAT_ENABLED = 'n'
+          }
+        }
         this.updateCatInfo()
       }
     },
@@ -149,15 +158,40 @@ export default {
       },
       set(value) {
         vueUtils.setPathVal(this.rootFormData, 'FEATURES.RDT.CDP_ENABLED', value)
-        this.SSRAM_ENABLED = 'n'
-        this.VCAT_ENABLED = 'n'
+        if (value === 'y') {
+          if (this.SSRAM_ENABLED === 'y') {
+            this.SSRAM_ENABLED = 'n'
+          }
+          if (this.VCAT_ENABLED === 'y') {
+            this.VCAT_ENABLED = 'n'
+          }
+        }
         if (this.RDT_ENABLED !== value) {
           this.RDT_ENABLED = value
-        } else {
-          this.updateCatInfo()
         }
+        this.updateCatInfo()
       }
-    }
+    },
+    VCAT_ENABLED: {
+      get() {
+        return vueUtils.getPathVal(this.rootFormData, 'FEATURES.RDT.VCAT_ENABLED')
+      },
+      set(value) {
+        vueUtils.setPathVal(this.rootFormData, 'FEATURES.RDT.VCAT_ENABLED', value)
+        if (value === 'y') {
+          if (this.SSRAM_ENABLED === 'y') {
+            this.SSRAM_ENABLED = 'n'
+          }
+          if (this.CDP_ENABLED === 'y') {
+            this.CDP_ENABLED = 'n'
+          }
+        }
+        if (this.RDT_ENABLED !== value) {
+          this.RDT_ENABLED = value
+        }
+        this.updateCatInfo()
+      }
+    },
   },
   watch: {
     CAT_INFO: {
@@ -267,6 +301,7 @@ export default {
 
       window.getCurrentScenarioData().vm.map((vmConfig) => {
         if (
+            vmConfig.load_order === 'SERVICE_VM' ||
             !vmConfig.hasOwnProperty('cpu_affinity') ||
             !vmConfig.cpu_affinity.hasOwnProperty('pcpu') ||
             !_.isArray(vmConfig.cpu_affinity.pcpu)
