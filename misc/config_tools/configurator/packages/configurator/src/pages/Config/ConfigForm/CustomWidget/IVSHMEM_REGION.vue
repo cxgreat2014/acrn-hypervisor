@@ -2,7 +2,7 @@
   <div class="IVSH_REGIONS" v-if="defaultVal && defaultVal.length>0">
     <div class="IVSH_REGION" v-for="(IVSHMEM_VMO, index) in defaultVal">
       <div class="IVSH_REGION_CONTENT">
-        <b style="margin-bottom: 2rem">InterVM shared memory region {{ index + 1 }}</b>
+        <b style="margin-bottom: 2rem">InterVM shared memory region</b>
 
         <b-row class="align-items-center my-2 mt-4">
           <b-col md="2">
@@ -190,7 +190,7 @@ export default {
   },
   methods: {
     validation(value) {
-      return (value != null) && (value.length != 0);
+      return (value != null) && (value.length !== 0);
     },
     addSharedVM(vms, index) {
       // add new item after current item
@@ -234,6 +234,7 @@ export default {
 };
 </script>
 
+<!--suppress CssUnusedSymbol -->
 <style scoped>
 label:before {
   content: '*';
