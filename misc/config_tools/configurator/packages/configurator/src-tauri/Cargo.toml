@@ -12,21 +12,24 @@ rust-version = "1.57"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5.2", features = [] }
+tauri-build = { version = "2.3.1", features = [] }
 
 [dependencies]
-openssl = "0.10.72" # fix vulnerability only
-idna = "=1.0.0"     # fix vulnerability only
-url = "=2.5.1"      # fix vulnerability only
-tokio = "=1.43.1"   # fix vulnerability only
-crossbeam-channel = "=0.5.15"   # fix vulnerability only
-serde_json = "1.0.81"
-serde = { version = "1.0.137", features = ["derive"] }
-tauri = { version = "1.6.7", features = ["api-all", "devtools"] }
-log = "0.4.17"
-glob = "0.3.0"
-dirs = "4.0.0"
-itertools = "0.10.3"
+# Security fixes - keep these pinned versions
+openssl = "0.10.64"
+idna = "1.0.2"
+url = "2.5.2"
+tokio = "1.40.0"
+crossbeam-channel = "0.5.13"
+
+# Core dependencies
+serde_json = "1.0.128"
+serde = { version = "1.0.210", features = ["derive"] }
+tauri = { version = "2.3.1", features = [ "devtools"] }
+log = "0.4.22"
+glob = "0.3.1"
+dirs = "5.0.1"
+itertools = "0.13.0"
 
 [features]
 # by default Tauri runs in production mode

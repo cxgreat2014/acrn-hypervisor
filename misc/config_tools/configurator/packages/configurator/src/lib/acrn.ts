@@ -1,4 +1,5 @@
-import {dialog, invoke} from "@tauri-apps/api";
+import {invoke} from "@tauri-apps/api/core";
+import * as dialog from "@tauri-apps/plugin-dialog";
 import JSON2XML from "./json2xml"
 import {OpenDialogOptions} from "@tauri-apps/api/dialog";
 import _ from "lodash";

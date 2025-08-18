@@ -31,8 +31,8 @@
 <script>
 import {Icon} from '@vicons/utils'
 import {Minus, WindowMaximizeRegular, Times, Cog} from '@vicons/fa'
-import {appWindow} from "@tauri-apps/api/window";
-import {invoke} from "@tauri-apps/api";
+import {getCurrentWindow} from "@tauri-apps/api/window";
+import {invoke} from "@tauri-apps/api/core";
 
 
 export default {
@@ -40,19 +40,19 @@ export default {
   components: {Icon, Minus, WindowMaximizeRegular, Times, Cog},
   methods: {
     minus() {
-      appWindow.minimize()
+      getCurrentWindow().minimize()
     },
     maximize() {
-      appWindow.isMaximized().then((isMaximize) => {
+      getCurrentWindow().isMaximized().then((isMaximize) => {
         if (isMaximize) {
-          appWindow.unmaximize()
+          getCurrentWindow().unmaximize()
         } else {
-          appWindow.maximize()
+          getCurrentWindow().maximize()
         }
       })
     },
     close: () => {
-      appWindow.close()
+      getCurrentWindow().close()
     },
     openDevtools: () => {
       invoke('open_devtools', {});
